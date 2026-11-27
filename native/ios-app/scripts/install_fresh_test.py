@@ -183,7 +183,7 @@ def brand_catalog(path, name, scheme):
     path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2))
 
 
-def stage_sources(repo, work, identity, bundle_id):
+def stage_sources(repo, work, identity, bundle_id, team):
     """Prepare only a private source copy. Project generation and signing happen later."""
     validate_identity(identity, bundle_id)
     source_native = (repo / "native").resolve()
@@ -212,7 +212,17 @@ def stage_sources(repo, work, identity, bundle_id):
 
     bundle, name, scheme = (identity[key] for key in ("bundle_id", "name", "scheme"))
     base = src / "project-base.yml"
-    replace(src / "myai.xcconfig", "MYAI_BUNDLE_ID = $(AILOVE_BUNDLE_ID)", f"MYAI_BUNDLE_ID = {bundle}")
+    # Give XcodeGen the concrete signing identity in this private project so it records the team
+    # in the generated target attributes and Xcode can provision the exact App Group.
+    replace(src / "myai.yml", "    CODE_SIGN_STYLE: Automatic",
+            f"    DEVELOPMENT_TEAM: {team}\n    CODE_SIGN_STYLE: Automatic")
+    replace(base, "bundleIdPrefix: org.myai.development", f"bundleIdPrefix: {bundle}")
+    replace(base, "configFiles:\n  Debug: myai.xcconfig\n  Release: myai.xcconfig\n", "")
+    replace(base, "POKI_BUNDLE_ID: $(MYAI_BUNDLE_ID)", f"POKI_BUNDLE_ID: {bundle}")
+    group = identity["group"]
+    replace(base, "POKI_APP_GROUP: group.$(POKI_BUNDLE_ID)", f"POKI_APP_GROUP: {group}")
+    replace(base, 'com.apple.security.application-groups: ["$(POKI_APP_GROUP)"]',
+            f'com.apple.security.application-groups: ["{group}"]')
     replace(base, "POKI_DISPLAY_NAME: myai", "POKI_DISPLAY_NAME: " + name)
     replace(base, "CFBundleURLSchemes: [myai]", f"CFBundleURLSchemes: [{scheme}]")
     replace(src / "project.yml", "CFBundleDisplayName: myai VPN", f"CFBundleDisplayName: {name} VPN")
@@ -236,7 +246,7 @@ def stage_sources(repo, work, identity, bundle_id):
 
 def build_app(repo, store, identity, team, bundle_id):
     work = store / "work"
-    src = stage_sources(repo, work, identity, bundle_id)
+    src = stage_sources(repo, work, identity, bundle_id, team)
     group = identity["group"]
     require(group == "group." + identity["bundle_id"], "The test App Group does not match the reserved bundle identifier.")
     env = os.environ.copy()
