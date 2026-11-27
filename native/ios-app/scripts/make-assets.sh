@@ -1,9 +1,10 @@
 #!/bin/bash
-# Generate app and widget assets from the myai mark.
+# Generate app and widget assets from the myai icon and mark.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$HERE/Poki/Assets.xcassets"
 WIDGET="$HERE/PokiWidgets/Assets.xcassets"
+ICON="$HERE/Brand/app-icon.png"
 rendered="$(mktemp -d)"
 trap 'rm -rf "$rendered"' EXIT
 swift "$HERE/scripts/draw-myai-mark.swift" "$rendered"
@@ -16,7 +17,8 @@ imageset() {
   cp "$3" "$folder/image@3x.png"
   echo '{"images":[{"filename":"image@3x.png","idiom":"universal","scale":"3x"}],"info":{"version":1,"author":"myai"}}' > "$folder/Contents.json"
 }
-sips -Z 192 "$rendered/icon.png" --out "$rendered/small-icon.png" >/dev/null
+sips -z 1024 1024 "$ICON" --out "$rendered/icon-1024.png" >/dev/null
+sips -z 192 192 "$ICON" --out "$rendered/small-icon.png" >/dev/null
 for catalogPath in "$APP" "$WIDGET"; do
   catalog "$catalogPath"
   imageset "$catalogPath" AiloveMark "$rendered/mark-408.png"
@@ -25,6 +27,6 @@ for catalogPath in "$APP" "$WIDGET"; do
   imageset "$catalogPath" AiloveIcon "$rendered/small-icon.png"
 done
 mkdir -p "$APP/AppIcon.appiconset" "$APP/AccentColor.colorset"
-cp "$rendered/icon.png" "$APP/AppIcon.appiconset/icon-1024.png"
+cp "$rendered/icon-1024.png" "$APP/AppIcon.appiconset/icon-1024.png"
 echo '{"images":[{"filename":"icon-1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"version":1,"author":"myai"}}' > "$APP/AppIcon.appiconset/Contents.json"
 echo '{"colors":[{"idiom":"universal","color":{"color-space":"srgb","components":{"red":"0x20","green":"0x84","blue":"0xFD","alpha":"1.000"}}}],"info":{"version":1,"author":"myai"}}' > "$APP/AccentColor.colorset/Contents.json"

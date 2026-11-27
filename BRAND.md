@@ -4,6 +4,6 @@ myai is an independent fork of [Poki](https://github.com/JosssphZhou/poki) by Jo
 
 The source code is available under [AGPL-3.0-only](LICENSE). Code and assets with separate terms are identified in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-The myai mark is drawn by [draw-myai-mark.swift](native/ios-app/scripts/draw-myai-mark.swift). The application and widget catalogs, desktop icons, runner icons and documentation icon use this mark. The artwork shown in this repository is the myai mark or artwork covered by a separately retained license.
+The iPhone app icon uses the [black-and-white myai monogram](native/ios-app/Brand/app-icon.png). The app and widget catalogs generate their square icon images from it. The [ribbon mark](native/ios-app/scripts/draw-myai-mark.swift) supplies the launch and activity graphics, desktop icons and runner icons. Artwork with separate terms is covered by its retained license.
 
 The Poki bear, Poki app icons and Poki promotional artwork are copyright © 2026 Joseph Zhou. Their terms are specified in [Poki's brand notice](https://github.com/JosssphZhou/poki/blob/main/BRAND.md). This repository omits the upstream character models and artwork, screenshots, promotional images, and bundled app and provider logos. The available provider names identify compatible services. The available app names identify apps that myai can operate.
