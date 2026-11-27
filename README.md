@@ -47,9 +47,10 @@ Developer Mode and UI Automation are device settings. They may already be enable
 
 ### Validation status
 
-The public snapshot, including the app, widget, packet-tunnel extension, and test targets,
-compiled for the iOS Simulator in Xcode 27.2. An earlier personal build was installed over Wi-Fi. The full first-use setup and a successful
-AI command still need verification on a physical iPhone with this public snapshot.
+The app, widget, packet-tunnel extension, and test targets compiled for the iOS Simulator
+in Xcode 27.2. Two isolated test builds of this snapshot were signed, installed over Wi-Fi,
+and verified on a physical iPhone. The full first-use setup and an AI command still need
+end-to-end verification.
 
 ## License and origin
 
