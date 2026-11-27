@@ -1,0 +1,28 @@
+{
+  "name": "poki-mcp",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/daemon.mjs",
+    "mcp": "node src/stdio.mjs",
+    "test": "node --test test/*.test.mjs",
+    "build:native": "./bin/build-native"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/node": "2.1.2",
+    "@modelcontextprotocol/server": "2.4.0",
+    "acorn": "8.19.0",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
+  },
+  "license": "AGPL-3.0-only",
+  "description": "Local MCP tools for iPhone and iOS Simulator automation on macOS.",
+  "bin": {
+    "poki-mcp": "bin/poki-mcp"
+  }
+}

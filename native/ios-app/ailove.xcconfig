@@ -1,0 +1,4 @@
+// The bundled identifier supports an unsigned Simulator build.
+AILOVE_BUNDLE_ID = org.ailove.development
+
+#include? "ailove.local.xcconfig"

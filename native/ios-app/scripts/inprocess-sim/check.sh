@@ -1,0 +1,206 @@
+#!/bin/bash
+# check.sh [--apps|--cycle|--duo-cover-compat XCODE] [NATIVE_DIR]
+# On a new simulator, Poki's in-process code (NATIVE_DIR, default this checkout's Poki/Native) reads the
+# fixture app's element tree, taps its text field, types, and reads the value and keyboard focus back.
+# The tree must hold every labelled element that the simulator's own accessibility reader
+# (native/simulator.m) reports for the same screen. With --apps it instead launches the fixture, launches
+# Settings, activates the fixture (the same process returns), launches it again (a new process) and
+# terminates it. With --cycle the field check runs after the session was closed and opened again, as Poki
+# does when it is idle. POKI_CHECK_IPAD=1 runs the same check on an iPad. (An iPhone-only app on iPad reports
+# its elements in its own scaled coordinates with the origin at 0,0, so taps from its tree miss: not handled yet); a touch sent while closed must not use the closed session (refused, or a new one). The simulator is deleted afterwards.
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+MODE=field
+if [ "${1:-}" = "--apps" ]; then MODE=apps; shift; fi
+if [ "${1:-}" = "--cycle" ]; then MODE=cycle; shift; fi
+FIXTURE_DEV="$(xcode-select -p)"
+if [ "${1:-}" = "--duo-cover-compat" ]; then
+  MODE=cover-compat
+  POKI_CHECK_DUO=1
+  FIXTURE_DEV="${2:?supply the Xcode 27.0 application path}/Contents/Developer"
+  shift 2
+fi
+# --shot full|letterboxed: only read the screen and take Poki's picture of it. "full" needs a picture
+# of the whole display; "letterboxed" needs the refusal a build with an SDK before iOS 27.1 gets on
+# an iPhone Duo (#419). POKI_CHECK_DUO=1 runs any mode on an iPhone Duo simulator.
+EXPECT=""
+if [ "${1:-}" = "--shot" ]; then MODE=shot; EXPECT="$2"; shift 2; fi
+REPO="$(cd "$HERE/../../../.." && pwd)"
+NATIVE="$(cd "${1:-$REPO/native/ios-app/Poki/Native}" && pwd)"
+X="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+TEXT="${POKI_CHECK_TEXT:-ESP173 读屏}"
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/poki-inprocess.XXXXXX")"
+UDID=""
+cleanup() {
+  if [ -n "$UDID" ]; then xcrun simctl shutdown "$UDID" >/dev/null 2>&1 || true; xcrun simctl delete "$UDID" >/dev/null 2>&1 || true; fi
+  rm -rf "$WORK"
+}
+trap cleanup EXIT
+
+# POKI_CHECK_BUILD_XCODE=/Applications/Xcode_27.0.app compiles the check app with that Xcode's SDK,
+# while the simulator and the fixture stay with the selected Xcode: an app linked before the iOS
+# 27.1 SDK is letterboxed on an iPhone Duo (--shot letterboxed).
+BUILD_DEV="${POKI_CHECK_BUILD_XCODE:+$POKI_CHECK_BUILD_XCODE/Contents/Developer}"
+BUILD_DEV="${BUILD_DEV:-$(xcode-select -p)}"
+SDK="$(DEVELOPER_DIR="$BUILD_DEV" xcrun --sdk iphonesimulator --show-sdk-path)"
+echo "check app SDK: $(DEVELOPER_DIR="$BUILD_DEV" xcrun --sdk iphonesimulator --show-sdk-version)"
+APP="$WORK/InProcessCheck.app"; mkdir -p "$APP"
+DEVELOPER_DIR="$BUILD_DEV" xcrun --sdk iphonesimulator clang -target arm64-apple-ios26.0-simulator -isysroot "$SDK" -fobjc-arc -fmodules \
+  -Wall -Werror -Wno-deprecated-declarations -I "$NATIVE" \
+  "$HERE/main.m" "$NATIVE/InProcess.m" "$NATIVE/RecoveredNative.m" -framework UIKit -o "$APP/InProcessCheck"
+cp "$HERE/Info.plist" "$APP/Info.plist"
+codesign -s - --force "$APP" >/dev/null 2>&1
+xcrun clang -fobjc-arc -fblocks -framework Foundation -framework AppKit -framework UniformTypeIdentifiers \
+  "$REPO/native/simulator.m" -o "$WORK/simulator"
+DEVELOPER_DIR="$FIXTURE_DEV" xcodebuild -project "$REPO/bin/fixture-app/PokiMCPFixture.xcodeproj" -scheme PokiMCPFixture -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath "$WORK/fixture" CODE_SIGNING_ALLOWED=NO -quiet build
+FIXTURE="$WORK/fixture/Build/Products/Debug-iphonesimulator/PokiMCPFixture.app"
+
+if [ -n "${POKI_CHECK_DUO:-}" ]; then
+  # The Duo's device type by its name or model, on the newest runtime that has such a simulator.
+  xcrun simctl list -j > "$WORK/simctl.json"
+  read -r RUNTIME TYPE < <(python3 - "$WORK/simctl.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+duo = [t for t in d["devicetypes"] if "Duo" in t["name"] or t.get("modelIdentifier") == "iPhone19,4" or "Duo" in t["identifier"]]
+if not duo:
+    sys.exit("no iPhone Duo device type; iPhones here: " + ", ".join(t["name"] for t in d["devicetypes"] if t.get("productFamily") == "iPhone"))
+ids = {t["identifier"] for t in duo}
+runtimes = [r for r in d["runtimes"] if r.get("platform", "iOS") == "iOS" and r["isAvailable"]]
+def version(r): return tuple(int(v) for v in r["version"].split("."))
+for r in sorted(runtimes, key=version, reverse=True):
+    listed = [t["identifier"] for t in r.get("supportedDeviceTypes", []) if t["identifier"] in ids]
+    made = [x["deviceTypeIdentifier"] for x in d["devices"].get(r["identifier"], []) if x.get("deviceTypeIdentifier") in ids]
+    if listed or made:
+        print(r["identifier"], (listed or made)[0]); break
+else:
+    sys.exit("no runtime lists %s; runtimes: %s" % (sorted(ids), [r["identifier"] for r in runtimes]))
+PY
+  )
+else
+read -r RUNTIME TYPE < <(xcrun simctl list runtimes -j | python3 -c '
+import json, sys
+r = [x for x in json.load(sys.stdin)["runtimes"] if x["platform"] == "iOS" and x["isAvailable"]][-1]
+family = "iPad" if sys.argv[1] else "iPhone"
+print(r["identifier"], next(t["identifier"] for t in r["supportedDeviceTypes"] if t["productFamily"] == family))' "${POKI_CHECK_IPAD:-}")
+fi
+[ -n "${TYPE:-}" ] || { echo "::error::no simulator to run on"; exit 1; }
+echo "simulator: $TYPE on $RUNTIME"
+UDID="$(xcrun simctl create poki-inprocess-check "$TYPE" "$RUNTIME")"
+xcrun simctl boot "$UDID"
+xcrun simctl bootstatus "$UDID" -b >/dev/null
+if [ "${POKI_CHECK_DUO:-}" = "1" ] && [ "$EXPECT" = "full" ]; then
+  DEVELOPER_DIR="$BUILD_DEV" "$HERE/duo-panel-shot.sh" "$UDID" "$NATIVE"
+fi
+xcrun simctl install "$UDID" "$APP"
+xcrun simctl install "$UDID" "$FIXTURE"
+
+export SIMCTL_CHILD_POKI_SIMULATOR_DEVELOPER_DIR="$X"
+export SIMCTL_CHILD_DYLD_FRAMEWORK_PATH="$X/Library/Frameworks:$X/Library/PrivateFrameworks"
+export SIMCTL_CHILD_DYLD_LIBRARY_PATH="$X/usr/lib"
+# POKI_INPROCESS_OWNED_SESSION=1 makes Poki open its own daemon session instead of XCTest's shared one.
+[ -n "${POKI_INPROCESS_OWNED_SESSION:-}" ] && export SIMCTL_CHILD_POKI_INPROCESS_OWNED_SESSION=1
+DOCS="$(xcrun simctl get_app_container "$UDID" local.poki.inprocess-check data)/Documents"
+if [ "$MODE" = apps ]; then
+  xcrun simctl launch "$UDID" local.poki.inprocess-check -mode apps -tag apps -delay 2 >/dev/null
+  for _ in $(seq 120); do [ -s "$DOCS/apps.json" ] && break; sleep 1; done
+  OUT="${POKI_CHECK_OUT:-}"; if [ -n "$OUT" ]; then mkdir -p "$OUT"; cp "$DOCS/apps.json" "$OUT/"; fi
+  cat "$DOCS/apps.json"
+  RUNNING="$(xcrun simctl spawn "$UDID" launchctl list | grep -c 'UIKitApplication:local.pokimcp.fixture\[' || true)"
+  python3 - "$DOCS/apps.json" "$RUNNING" <<'PY'
+import json, sys
+r = json.load(open(sys.argv[1]))
+assert r["prepare"].get("ok"), f"no session: {r['prepare']}"
+s = r["steps"]
+fixture, settings = "local.pokimcp.fixture", "com.apple.Preferences"
+for i, (action, bundle, front) in enumerate([("launch", fixture, fixture), ("launch", settings, settings), ("activate", fixture, fixture), ("launch", fixture, fixture)]):
+    assert s[i]["code"] == "" and s[i]["front"] == front, f"step {i + 1} {action} {bundle}: {s[i]}"
+assert s[2]["front_pid"] == s[0]["front_pid"], f"activate started a new process: {s[0]['front_pid']} then {s[2]['front_pid']}"
+assert s[3]["front_pid"] != s[0]["front_pid"], f"launch kept the running process {s[3]['front_pid']}"
+assert s[4]["code"] == "" and s[4]["front"] != fixture, f"terminate: {s[4]}"
+assert sys.argv[2] == "0", f"the fixture still runs after terminate ({sys.argv[2]} launchd jobs)"
+PY
+  echo "in-process launch, launch, activate, relaunch and terminate passed"
+  exit 0
+fi
+if [ "$MODE" = shot ]; then
+  xcrun simctl launch "$UDID" local.poki.inprocess-check -mode read -tag shot -delay 8 >/dev/null
+  sleep 3
+  xcrun simctl launch "$UDID" local.pokimcp.fixture >/dev/null
+  for _ in $(seq 90); do [ -s "$DOCS/shot.json" ] && break; sleep 1; done
+  OUT="${POKI_CHECK_OUT:-}"
+  if [ -n "$OUT" ]; then mkdir -p "$OUT"; cp "$DOCS"/shot* "$OUT/" 2>/dev/null || true; xcrun simctl io "$UDID" screenshot "$OUT/screen.png" >/dev/null 2>&1 || true; fi
+  [ -s "$DOCS/shot.json" ] || { echo "::error::the check app wrote no result in 90 s"; exit 1; }
+  python3 - "$DOCS/shot.json" "$EXPECT" <<'PY'
+import json, sys
+r = json.load(open(sys.argv[1]))
+print(json.dumps({k: r.get(k) for k in ("prepare", "front", "display", "screenshot", "source_code")}, indent=1, ensure_ascii=False))
+assert r["prepare"].get("ok"), f"no session: {r['prepare']}"
+shot = r["screenshot"]
+if sys.argv[2] == "letterboxed":
+    assert shot["bytes"] == 0 and shot["code"] == "duo_needs_ios_27_1_sdk_build", f"expected the letterbox refusal, got {shot}"
+    print("reproduced: a build with an SDK before iOS 27.1 gets no picture on the iPhone Duo")
+else:
+    assert shot["bytes"] > 0 and not shot["code"], f"no picture: {shot}"
+    assert r["front"].get("bundleId") == "local.pokimcp.fixture", f"front app: {r['front']}"
+    print(f"picture {shot['width']:.0f}x{shot['height']:.0f} of display {r['display']}")
+PY
+  exit 0
+fi
+if [ "$MODE" = cover-compat ]; then
+  xcrun simctl launch "$UDID" local.poki.inprocess-check -mode "$MODE" -tag field -text "$TEXT" >/dev/null
+else
+  xcrun simctl launch "$UDID" local.poki.inprocess-check -mode "$MODE" -tag field -delay 8 -text "$TEXT" -times "${POKI_CHECK_TIMES:-1}" >/dev/null
+  sleep 3
+  xcrun simctl launch "$UDID" local.pokimcp.fixture >/dev/null
+fi
+for _ in $(seq 90); do [ -s "$DOCS/field.json" ] && break; sleep 1; done
+if [ ! -s "$DOCS/field.json" ]; then
+  echo "::error::the check app wrote no result in 90 s"
+  [ -s "$DOCS/field-progress.json" ] && { echo "progress:"; cat "$DOCS/field-progress.json"; }
+  echo "check app running: $(xcrun simctl spawn "$UDID" launchctl list | grep -c 'local.poki.inprocess-check' || true)"
+  for f in $(ls -t ~/Library/Logs/DiagnosticReports/InProcessCheck* 2>/dev/null | head -1); do echo "== crash $f"; head -60 "$f"; done
+  xcrun simctl spawn "$UDID" log show --last 3m --predicate 'process == "InProcessCheck" OR process == "testmanagerd"' --style compact 2>/dev/null | tail -60 || true
+  OUT="${POKI_CHECK_OUT:-}"; if [ -n "$OUT" ]; then mkdir -p "$OUT"; cp "$DOCS"/field* "$OUT/" 2>/dev/null || true; cp ~/Library/Logs/DiagnosticReports/InProcessCheck* "$OUT/" 2>/dev/null || true; fi
+  exit 1
+fi
+echo "{\"id\":\"$UDID\",\"op\":\"ax\"}" | "$WORK/simulator" > "$WORK/reference.json"
+OUT="${POKI_CHECK_OUT:-}"
+if [ -n "$OUT" ]; then
+  mkdir -p "$OUT"
+  cp "$DOCS"/field* "$WORK/reference.json" "$OUT/"
+  if [ "$MODE" = cover-compat ]; then
+    xcrun simctl io "$UDID" screenshot --display=1 "$OUT/screen.png" || true
+  else
+    xcrun simctl io "$UDID" screenshot "$OUT/screen.png" >/dev/null 2>&1 || true
+  fi
+fi
+cat "$DOCS/field.json"
+python3 - "$DOCS/field.json" "$TEXT" "$MODE" "$DOCS/field.xml" <<'PY'
+import json, sys
+import xml.etree.ElementTree as ET
+r = json.load(open(sys.argv[1]))
+assert r["prepare"].get("ok"), f"no session: {r['prepare']}"
+if sys.argv[3] == "cycle":
+    assert r["close"].get("closed"), f"close found no session: {r['close']}"
+    t = r["closed_touch"]
+    assert t["delivery"] == 0 or t["generation_after"] > t["generation_before"], f"a touch after close went through the closed session: {t}"
+    assert r["prepare2"].get("ok"), f"the session did not open again: {r['prepare2']}"
+    assert r["prepare2"]["generation"] > r["prepare"]["generation"], f"the reopened session kept generation {r['prepare2']['generation']}"
+    assert "source_code2" not in r, f"no element tree after reopening: {r['source_code2']}"
+    assert r["front2"].get("bundleId") == "local.pokimcp.fixture", f"front app after reopening: {r['front2']}"
+assert "source_code" not in r, f"no element tree: {r['source_code']}"
+assert r["front"].get("bundleId") == "local.pokimcp.fixture", f"front app: {r['front']}"
+if sys.argv[3] == "cover-compat":
+    assert r["launch_code"] == "", f"launch: {r['launch_code']}"
+    window = ET.parse(sys.argv[4]).find(".//XCUIElementTypeWindow")
+    assert window is not None and (window.get("width"), window.get("height")) == ("386", "678"), "fixture is not in the cover compatibility layout"
+    shot = r["screenshot"]
+    assert shot["bytes"] > 0 and not shot["code"] and (shot["width"], shot["height"]) == (1398, 2034), f"cover screenshot: {shot}"
+assert r.get("tap") == 1 and r.get("type") == 1, f"tap {r.get('tap')} type {r.get('type')}"
+assert r.get("focus", {}).get("value") == sys.argv[2], f"focused field reads {r.get('focus')}"
+PY
+SHIFT="$(python3 -c 'import json,sys,re;v=json.load(open(sys.argv[1])).get("viewport","");m=re.findall(r"-?[0-9.]+",v);print(m[0],m[1]) if m else print("0 0")' "$DOCS/field.json")"
+[ "$SHIFT" != "0 0" ] && echo "viewport origin: $SHIFT"
+python3 "$HERE/compare.py" "$DOCS/field-after.xml" "$WORK/reference.json" $SHIFT
+if [ "$MODE" = cycle ]; then echo "in-process close, reopen (generation $(python3 -c "import json;print(json.load(open('$DOCS/field.json'))['prepare2']['generation'])")), read, tap, type and read-back passed"; else echo "in-process read, tap, type and read-back passed"; fi

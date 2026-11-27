@@ -1,0 +1,29 @@
+Poki/Assets.xcassets/
+Poki/LaunchImages/
+PokiWidgets/Assets.xcassets/
+*.xcodeproj/*
+!Poki.xcodeproj/project.xcworkspace/
+Poki.xcodeproj/project.xcworkspace/*
+!Poki.xcodeproj/project.xcworkspace/xcshareddata/
+Poki.xcodeproj/project.xcworkspace/xcshareddata/*
+!Poki.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+Poki.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!Poki.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+!PokiExternal.xcodeproj/project.xcworkspace/
+PokiExternal.xcodeproj/project.xcworkspace/*
+!PokiExternal.xcodeproj/project.xcworkspace/xcshareddata/
+PokiExternal.xcodeproj/project.xcworkspace/xcshareddata/*
+!PokiExternal.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+PokiExternal.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!PokiExternal.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+# Written by xcodegen from project.yml.
+Poki/Info.plist
+Poki/Poki.entitlements
+Poki/PokiLocal.entitlements
+PokiWidgets/Info.plist
+PokiWidgets/PokiWidgets.entitlements
+PokiTunnel/Info.plist
+PokiTunnel/PokiTunnel.entitlements
+
+# Local signing settings
+/ailove.local.xcconfig

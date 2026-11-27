@@ -1,0 +1,31 @@
+node_modules/
+build/
+.deps/
+.runtime/
+*.log
+.DS_Store
+.env
+.env.*
+native/launcher/target/
+
+# Local Xcode and SwiftPM state
+xcuserdata/
+.swiftpm/
+DerivedData/
+*.xcuserstate
+*.xcresult
+*.xcarchive
+
+# Signing, device and pairing material
+*.mobileprovision
+*.provisionprofile
+*.p8
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.ipa
+pairing.plist
+pairing-phone.plist
+ailove.local.xcconfig

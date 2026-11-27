@@ -1,0 +1,654 @@
+import Foundation
+import Network
+import Observation
+import PokiCore
+import SwiftUI
+import UIKit
+import WebKit
+import XCTest
+@testable import Poki
+
+/// Poki's browser tools on real pages served from 127.0.0.1, on the line between what Poki may tap and
+/// what is the owner's. A notice that only informs (a cookie banner, a site's terms notice) Poki
+/// dismisses itself, with the reject choice when there is one, and the step says so. Anything that
+/// would give the owner an obligation or an identity (sign-in, sign-up, age, agreeing to terms, a
+/// prompt with an email field) goes to the owner through web_handoff. Each button on a page writes what
+/// was tapped into the page, so a test reads the page to see whether a tap happened.
+@MainActor
+final class BrowserGuardTests: XCTestCase {
+    func testStopClearsLoadingAndIgnoresLateNavigationCallbacks() throws {
+        let browser = PokiBrowser()
+        let navigation = try XCTUnwrap(browser.webView.loadHTMLString("<p>Page</p>", baseURL: nil))
+        browser.approveMainFrameNavigation(navigation)
+        browser.webView(browser.webView, didStartProvisionalNavigation: navigation)
+        XCTAssertTrue(browser.isLoading)
+
+        browser.taskStopped()
+        XCTAssertFalse(browser.isLoading)
+        browser.webView(browser.webView, didStartProvisionalNavigation: navigation)
+        XCTAssertFalse(browser.isLoading, "A queued callback must not restart a stopped load")
+    }
+
+    func testStopBeforeFirstProvisionalCallbackDoesNotRestartLoading() throws {
+        let browser = PokiBrowser()
+        let navigation = try XCTUnwrap(browser.webView.loadHTMLString("<p>Page</p>", baseURL: nil))
+        browser.taskStopped()
+
+        browser.webView(browser.webView, didStartProvisionalNavigation: navigation)
+
+        XCTAssertFalse(browser.isLoading)
+    }
+
+    func testNewPolicyDoesNotReadmitStoppedNavigationEvenForSameURL() throws {
+        guard #available(iOS 27.0, *) else { throw XCTSkip("Requires WebKit navigation identity in the policy callback") }
+        let browser = PokiBrowser()
+        let request = URLRequest(url: try XCTUnwrap(URL(string: "about:blank")))
+        let old = try XCTUnwrap(browser.webView.load(request))
+        browser.approveMainFrameNavigation(old)
+        browser.taskStopped()
+        let new = try XCTUnwrap(browser.webView.load(request))
+        browser.approveMainFrameNavigation(new)
+
+        browser.webView(browser.webView, didStartProvisionalNavigation: old)
+        XCTAssertFalse(browser.isLoading, "Approving a new request must not revive the old navigation")
+
+        browser.webView(browser.webView, didStartProvisionalNavigation: new)
+        XCTAssertTrue(browser.isLoading)
+        browser.webView(browser.webView, didFailProvisionalNavigation: old, withError: URLError(.cancelled))
+        XCTAssertTrue(browser.isLoading, "A late failure must not finish the new navigation")
+        browser.webView(browser.webView, didFinish: new)
+        XCTAssertFalse(browser.isLoading)
+    }
+
+    func testActWaitsForSlowLinkAfterStopOnOlderWebKit() async throws {
+        if #available(iOS 27.0, *) { throw XCTSkip("Requires the older WebKit policy callback") }
+        let priorLocalFixtures = BrowserAddress.allowsLocal
+        BrowserAddress.allowsLocal = true
+        defer { BrowserAddress.allowsLocal = priorLocalFixtures }
+        let pages = try PageServer(pages: [
+            "/first": "<title>First</title><a id='next' href='/second'>Next</a>",
+            "/second": "<title>Second</title>",
+        ], delayedPath: "/second")
+        let browser = PokiBrowser()
+        let first = try XCTUnwrap(URL(string: "http://127.0.0.1:\(pages.port)/first"))
+        await browser.open(first)
+        _ = try XCTUnwrap(browser.url, "The fixture must load before Stop")
+        XCTAssertEqual(browser.url?.path, "/first")
+        let second = try XCTUnwrap(URL(string: "http://127.0.0.1:\(pages.port)/second"))
+        let stopped = try XCTUnwrap(browser.webView.load(URLRequest(url: second)))
+        browser.taskStopped()
+
+        let lateStart = expectation(description: "New policy decision delivered before the delayed old start")
+        browser.didAllowMainFrameForTesting = { [weak browser] in
+            guard let browser else { return }
+            browser.didAllowMainFrameForTesting = nil
+            browser.webView(browser.webView, didStartProvisionalNavigation: stopped)
+            XCTAssertFalse(browser.isLoading, "A delayed start must not claim a new policy decision")
+            lateStart.fulfill()
+        }
+
+        let clicked = await browser.act {
+            (try? await browser.webView.evaluateJavaScript("document.querySelector('#next').click(); true")) as? Bool
+        }
+        await fulfillment(of: [lateStart], timeout: 1)
+        XCTAssertEqual(clicked, true)
+        XCTAssertEqual(browser.url?.path, "/second")
+        let title = try await browser.webView.evaluateJavaScript("document.title") as? String
+        XCTAssertEqual(title, "Second")
+    }
+
+    func testPageInitiatedNavigationAfterStopUpdatesBrowser() async throws {
+        let pages = try PageServer(pages: [
+            "/first": "<html><title>First</title></html>",
+            "/second": "<html><title>Second</title></html>",
+        ])
+        let browser = PokiBrowser()
+        let first = try XCTUnwrap(URL(string: "http://127.0.0.1:\(pages.port)/first"))
+        await browser.open(first)
+        XCTAssertEqual(browser.url?.path, "/first")
+        browser.taskStopped()
+
+        let loaded = expectation(description: "Page-initiated navigation finished")
+        let observation = browser.webView.observe(\.isLoading, options: [.new]) { view, _ in
+            if !view.isLoading, view.url?.path == "/second" { loaded.fulfill() }
+        }
+        defer { observation.invalidate() }
+        _ = try await browser.webView.evaluateJavaScript("setTimeout(() => { location.href = '/second' }, 0);")
+        await fulfillment(of: [loaded], timeout: 5)
+        XCTAssertEqual(browser.url?.path, "/second")
+        let title = try await browser.webView.evaluateJavaScript("document.title") as? String
+        XCTAssertEqual(title, "Second")
+        XCTAssertFalse(browser.isLoading)
+    }
+
+    func testCancelledOwnerWaitLeavesThePageWithTheOwner() async {
+        let browser = PokiBrowser()
+        browser.takeOver()
+        let started = expectation(description: "waiting for owner")
+        let cancelled = expectation(description: "cancelled wait returned")
+        let wait = Task { @MainActor in
+            started.fulfill()
+            let allowed = await browser.waitForPoki()
+            XCTAssertFalse(allowed)
+            cancelled.fulfill()
+        }
+        await fulfillment(of: [started], timeout: 2)
+        wait.cancel()
+        await fulfillment(of: [cancelled], timeout: 2)
+        XCTAssertTrue(browser.ownerHasIt)
+        browser.handBack()
+        await wait.value
+    }
+
+    private var language = AppLocalization.system
+
+    /// The steps' words follow Poki's language; these tests read the English ones.
+    override func setUp() async throws {
+        language = AppLocalization.shared.preference
+        AppLocalization.shared.preference = "en"
+    }
+
+    override func tearDown() async throws {
+        PokiBrowser.shared.close()
+        AppLocalization.shared.preference = language
+    }
+
+    /// A step is worded in the language chosen in Poki when it starts, whatever the iPhone's language.
+    /// Steps already listed keep their words, and what the model reads stays as it was.
+    func testNewStepsUseTheChosenLanguageAndListedStepsKeepTheirs() async throws {
+        let server = try PageServer(pages: ["/": "<html><title>Notes</title><body>Public notes</body></html>"])
+        let opened = await WebTools.perform("web_open", arguments: Self.json(["url": "http://127.0.0.1:\(server.port)/"]))
+        XCTAssertFalse(opened.isError, opened.text)
+
+        AppLocalization.shared.preference = "zh-Hans"
+        let read = await WebTools.perform("web_read", arguments: "{}")
+        XCTAssertTrue(read.text.contains("Public notes"), read.text)
+        let found = await WebTools.perform("web_read", arguments: Self.json(["find": "notes"]))
+        XCTAssertFalse(found.isError, found.text)
+        let refused = await WebTools.perform("web_click", arguments: "{}")
+        XCTAssertEqual(refused.text, "web_click needs a ref from the latest page read.")
+
+        AppLocalization.shared.preference = "zh-Hant"
+        _ = await WebTools.perform("web_read", arguments: "{}")
+        XCTAssertEqual(PokiBrowser.shared.steps.map(\.text), ["Open 127.0.0.1", "读取页面", "查找“notes”", "讀取頁面"])
+    }
+
+    func testCloseThenOpenReadsTheNewPageAndCloseClearsIt() async throws {
+        let pages = try PageServer(pages: [
+            "/first": "<html><title>First fixture</title><body>First result</body></html>",
+            "/second": "<html><title>Second fixture</title><body>Second result</body></html>",
+        ])
+        let browser = PokiBrowser.shared
+        for index in 0..<20 {
+            let path = index.isMultiple(of: 2) ? "/first" : "/second"
+            let expected = index.isMultiple(of: 2) ? "First result" : "Second result"
+            print("Browser reopen cycle \(index + 1): opening \(path)")
+            let answer = await WebTools.perform("web_open", arguments: Self.json(["url": "http://127.0.0.1:\(pages.port)\(path)"]))
+            XCTAssertFalse(answer.isError, answer.text)
+            XCTAssertTrue(answer.text.contains(expected), answer.text)
+            browser.close()
+            print("Browser reopen cycle \(index + 1): complete")
+        }
+
+        let cleared = expectation(description: "Closing replaces the page with an empty document")
+        let observation = browser.webView.observe(\.isLoading, options: [.initial, .new]) { view, _ in
+            if !view.isLoading, view.url?.absoluteString == "about:blank" { cleared.fulfill() }
+        }
+        await fulfillment(of: [cleared], timeout: 5)
+        observation.invalidate()
+        XCTAssertFalse(browser.isOpen)
+        let text = try await browser.webView.evaluateJavaScript("document.body.innerText") as? String
+        XCTAssertEqual(text, "")
+    }
+
+    func testWikipediaTaskKeepsPhoneAutomationOff() async throws {
+        let pages = try PageServer(pages: ["/": "<html><title>On this day</title><body>Public history page</body></html>"])
+        let server = try FakeCompletions(replies: [
+            FakeCompletions.tool("report_plan", ["steps": ["用维基百科搜一下历史上的今天"], "currentStep": 1]),
+            FakeCompletions.tool("web_open", ["url": "http://127.0.0.1:\(pages.port)/"]),
+            FakeCompletions.tool("status", [:]),
+            FakeCompletions.tool("routines", ["action": "list"]),
+            FakeCompletions.tool("do", ["actions": []]),
+            FakeCompletions.text("The public history page is ready."),
+        ])
+        let keys = ["chat.provider", "chat.customURL", "chat.customModel", "custom.providers", "chat.customProvider", "chat.model.custom"]
+        let previous = keys.map { UserDefaults.standard.object(forKey: $0) }
+        defer { for (key, value) in zip(keys, previous) { UserDefaults.standard.set(value, forKey: key) } }
+        ModelKeys.customURL = "http://127.0.0.1:\(server.port)/v1"
+        ModelKeys.customModel = "fake-model"
+        ModelKeys.selectedProvider = .custom
+        let app = AppModel(launcher: FakeLauncher(), pairer: FakePairing(), automation: FakeAutomation())
+        let connection = app.setup.loopback
+        app.setup.loopback = .builtIn
+        let chat = ChatModel(app: app, kind: .handoff, requester: "Browser regression")
+        defer { chat.stop(); app.stopSession(); app.setup.loopback = connection }
+
+        _ = await chat.runDelegated("用维基百科搜一下历史上的今天")
+
+        let web = try XCTUnwrap(chat.savedCalls.first(where: { $0.name == "web_open" }))
+        XCTAssertTrue(web.ok, web.answer)
+        XCTAssertTrue(web.answer.contains("Public history page"), web.answer)
+        XCTAssertFalse(app.sessionOn, "A website task must not start phone automation, including for status or saved routines.")
+        let phone = try XCTUnwrap(chat.savedCalls.first(where: { $0.name == "do" }))
+        XCTAssertFalse(phone.ok)
+        XCTAssertTrue(phone.answer.contains("sandbox browser"), phone.answer)
+        let prompt = FakeCompletions.system(try XCTUnwrap(server.requests.first))
+        XCTAssertFalse(prompt.contains("Start the task with a do in your first reply"))
+        XCTAssertTrue(prompt.contains("Use web_open and web tools alone for public websites"), "the website route reaches the model")
+        XCTAssertTrue(prompt.contains("Website verification codes also go to the owner through web_handoff"), "a website's sign-in code stays with the owner")
+        // Who Poki is comes first, then the phone's tool rules, then the browser's.
+        XCTAssertTrue(prompt.hasPrefix("You are ailove, the user's personal assistant"), String(prompt.prefix(80)))
+        let phoneRules = try XCTUnwrap(prompt.range(of: "look reads the iPhone's screen")).lowerBound
+        let browserRules = try XCTUnwrap(prompt.range(of: "Poki has its own browser for websites")).lowerBound
+        XCTAssertLessThan(phoneRules, browserRules)
+    }
+
+    /// Poki's browser is for public websites: this iPhone and its local network are not opened, in
+    /// any way an address can be written. (These tests serve from 127.0.0.1, which only a test run allows.)
+    func testLocalAddressesAreNotWebsites() async throws {
+        for host in ["localhost", "127.0.0.1", "2130706433", "0x7f.1", "10.0.0.1", "172.20.1.1", "192.168.1.1", "169.254.1.1", "100.64.0.1",
+                     "0.0.0.0", "router", "printer.local", "nas.lan", "[::1]", "::ffff:192.168.1.1", "fe80::1", "fd00::1"] {
+            XCTAssertTrue(BrowserAddress.isLocal(host), host)
+        }
+        for host in ["example.com", "example.com.", "www.fandango.com", "8.8.8.8", "172.32.0.1", "100.128.0.1", "2606:4700::1111", "local.example.com"] {
+            XCTAssertFalse(BrowserAddress.isLocal(host), host)
+        }
+        XCTAssertEqual(WebTools.address("http://example.com/a")?.absoluteString, "https://example.com/a", "a public site is opened over https")
+        XCTAssertEqual(WebTools.address("http://192.168.1.1/")?.scheme, "http")
+        XCTAssertNil(WebTools.address("https://user:secret@example.com/"))
+
+        BrowserAddress.allowsLocal = false
+        defer { BrowserAddress.allowsLocal = true }
+        XCTAssertEqual(BrowserAddress.refusal(try XCTUnwrap(URL(string: "http://192.168.1.1/admin"))), .local)
+        XCTAssertNil(BrowserAddress.refusal(try XCTUnwrap(URL(string: "https://example.com/"))))
+        let opened = await WebTools.perform("web_open", arguments: Self.json(["url": "http://192.168.1.1/admin"]))
+        XCTAssertTrue(opened.isError, opened.text)
+        XCTAssertTrue(opened.text.contains("public websites only"), opened.text)
+    }
+
+    /// Deleting, sending, posting, moving money and cancelling are the owner's on a site that knows
+    /// them, in English and in both Chinese forms. A name that only contains such a word is not.
+    func testChangesToWhatTheOwnerHoldsAreTheOwners() {
+        for label in ["Delete", "Delete account", "Send message", "Post", "Transfer $50", "Withdraw", "Cancel subscription", "Close my account",
+                      "Place your order", "Donate", "Book now", "删除", "刪除", "發送", "轉帳", "取消訂閱", "購買", "訂閱", "註冊"] {
+            XCTAssertNotNil(WebTools.ownersTap(label), label)
+        }
+        for label in ["The Washington Post", "How to send a parcel", "Showtimes", "Next", "Reject all", "Search", "苹果发布会定于下周举行，新品抢先看"] {
+            XCTAssertNil(WebTools.ownersTap(label), label)
+        }
+    }
+
+    func testPokiRejectsCookiesAndLeavesSignInAgeAndTermsToTheOwner() async throws {
+        let server = try PageServer(pages: ["/": Self.page])
+        let opened = await WebTools.perform("web_open", arguments: Self.json(["url": "http://127.0.0.1:\(server.port)/"]))
+        XCTAssertFalse(opened.isError, opened.text)
+        let accept = try Self.ref("Accept all", in: opened.text)
+        let reject = try Self.ref("Reject all", in: opened.text)
+
+        let accepted = await WebTools.perform("web_click", arguments: Self.json(["ref": accept]))
+        XCTAssertTrue(accepted.isError, accepted.text)
+        XCTAssertTrue(accepted.text.contains("[\(reject)]"), "names the reject choice: \(accepted.text)")
+
+        for label in ["Sign In", "Create account", "I am 21 or older", "I agree to the Terms of Service"] {
+            let tapped = await WebTools.perform("web_click", arguments: Self.json(["ref": try Self.ref(label, in: opened.text)]))
+            XCTAssertTrue(tapped.isError, "\(label): \(tapped.text)")
+            XCTAssertTrue(tapped.text.contains("web_handoff"), "\(label): \(tapped.text)")
+        }
+        let page = await WebTools.perform("web_read", arguments: "{}")
+        XCTAssertFalse(page.text.contains("Tapped:"), "nothing on the page was tapped: \(page.text)")
+
+        let rejected = await WebTools.perform("web_click", arguments: Self.json(["ref": reject]))
+        XCTAssertFalse(rejected.isError, rejected.text)
+        XCTAssertTrue(rejected.text.contains("Tapped: Reject all"), rejected.text)
+        XCTAssertEqual(PokiBrowser.shared.steps.last?.text, "Dismissed 127.0.0.1’s cookie banner: “Reject all”")
+    }
+
+    /// "By continuing to use this site you agree to our terms" only informs: Poki taps Continue itself,
+    /// and the step names the notice it dismissed.
+    func testPokiDismissesASiteTermsNoticeAndShowsItInTheSteps() async throws {
+        let server = try PageServer(pages: ["/": Self.termsNotice])
+        let opened = await WebTools.perform("web_open", arguments: Self.json(["url": "http://127.0.0.1:\(server.port)/"]))
+        XCTAssertFalse(opened.isError, opened.text)
+        XCTAssertTrue(opened.text.contains("banner is open"), "the notice is named: \(opened.text)")
+
+        let tapped = await WebTools.perform("web_click", arguments: Self.json(["ref": try Self.ref("Continue", in: opened.text)]))
+        XCTAssertFalse(tapped.isError, tapped.text)
+        XCTAssertTrue(tapped.text.contains("Tapped: Continue"), tapped.text)
+        XCTAssertEqual(PokiBrowser.shared.steps.last?.text, "Dismissed 127.0.0.1’s terms notice: “Continue”")
+    }
+
+    /// A sign-in prompt and a prompt that needs "I agree to the terms" ticked also float over the page,
+    /// mention privacy and say Continue: they are the owner's, so Poki is neither pointed at Continue
+    /// nor allowed to tap it.
+    func testOwnersPromptsAreNotTakenForNotices() async throws {
+        let server = try PageServer(pages: ["/": Self.signIn, "/agree": Self.agreeToTerms])
+        for (path, labels) in [("/", ["Continue", "Continue with Google"]), ("/agree", ["Continue"])] {
+            let opened = await WebTools.perform("web_open", arguments: Self.json(["url": "http://127.0.0.1:\(server.port)\(path)"]))
+            XCTAssertFalse(opened.isError, opened.text)
+            XCTAssertFalse(opened.text.contains("banner is open"), "\(path): no banner hint on the owner's prompt: \(opened.text)")
+            for label in labels {
+                let tapped = await WebTools.perform("web_click", arguments: Self.json(["ref": try Self.ref(label, in: opened.text)]))
+                XCTAssertTrue(tapped.isError, "\(path) \(label): \(tapped.text)")
+                XCTAssertTrue(tapped.text.contains("web_handoff"), "\(path) \(label): \(tapped.text)")
+            }
+            let page = await WebTools.perform("web_read", arguments: "{}")
+            XCTAssertFalse(page.text.contains("Tapped:"), "\(path): nothing on the page was tapped: \(page.text)")
+        }
+    }
+
+    func testOwnerFieldValuesStayOutOfModelSessionsAndLogs() async throws {
+        let fields = [
+            ("<input autocomplete='one-time-code' inputmode='numeric'>", "739281"),
+            ("<input type='tel' autocomplete='section-pay billing cc-number'>", "4111222233334444"),
+            ("<input type='password'>", "fake-password-739"),
+            ("<input autocomplete='current-password'>", "fake-current-392"),
+            ("<input autocomplete='new-password'>", "fake-new-824"),
+            ("<input type='number' autocomplete='cc-csc'>", "937482"),
+            ("<input autocomplete='cc-exp'>", "12/2039"),
+            ("<input autocomplete='cc-exp-month'>", "fake-month-09"),
+            ("<input autocomplete='cc-exp-year'>", "2038"),
+            ("<input name='passportNumber'>", "FAKE-PASSPORT-821"),
+            ("<input aria-label='身份证号码'>", "FAKE-ID-624"),
+            ("<input name='verificationCode'>", "842617"),
+            ("<input name='cardNumber'>", "5555666677778888"),
+            ("<input name='expiryDate'>", "11/2037"),
+            ("<input name='securityCode'>", "826491"),
+            ("<input inputmode='numeric'>", "318642"),
+            ("<input>", "private-unknown-952"),
+            ("<textarea name='passport'></textarea>", "FAKE-TEXTAREA-739"),
+            ("<div contenteditable='true' aria-label='Identity document'></div>", "FAKE-EDITABLE-521"),
+            ("<select autocomplete='cc-exp-year'><option value=''>Choose</option><option>2036</option></select>", "2036"),
+        ]
+        let controls = fields.map(\.0).joined(separator: "<br>")
+        let page = "<html><head><title>Local privacy fixture</title></head><body><input type='search' aria-label='Search' value='ordinary search'><button>Refresh</button>" + controls + "</body></html>"
+        let values = fields.map(\.1)
+        let fill = "for (const [i, el] of [...document.querySelectorAll('input:not([type=search]), textarea, select, [contenteditable]')].entries()) { if (el.isContentEditable) el.textContent = values[i]; else el.value = values[i]; }"
+        let pages = try PageServer(pages: ["/": page, "/filled": page.replacingOccurrences(of: "</body>", with: "<script>const values = \(Self.json(values)); \(fill)</script></body>")])
+        let address = "http://127.0.0.1:\(pages.port)"
+        let opened = await WebTools.perform("web_open", arguments: Self.json(["url": address]))
+        XCTAssertFalse(opened.isError)
+        let refresh = try Self.ref("Refresh", in: opened.text)
+        let search = try Self.ref("Search", in: opened.text)
+        let server = try FakeCompletions(replies: [
+            FakeCompletions.tool("web_handoff", ["reason": "Enter the local test fields"]),
+            FakeCompletions.tool("web_read", [:]),
+            FakeCompletions.tool("web_click", ["ref": refresh]),
+            FakeCompletions.tool("web_type", ["ref": search, "text": "ordinary updated search"]),
+            FakeCompletions.tool("web_open", ["url": address + "/filled"]),
+            FakeCompletions.text("Local privacy check finished."),
+        ])
+        let settings = ["chat.provider", "chat.customURL", "chat.customModel", "custom.providers", "chat.customProvider", "chat.model.custom"]
+        let previous = settings.map { UserDefaults.standard.object(forKey: $0) }
+        defer { for (key, value) in zip(settings, previous) { UserDefaults.standard.set(value, forKey: key) } }
+        ModelKeys.customURL = "http://127.0.0.1:\(server.port)/v1"
+        ModelKeys.customModel = "fake-model"
+        ModelKeys.selectedProvider = .custom
+        let app = AppModel(launcher: FakeLauncher(), pairer: FakePairing())
+        app.inProcessReadyForProbe()
+        let chat = ChatModel(app: app, kind: .handoff, requester: "Local privacy test")
+        defer { chat.stop() }
+        let handedOver = expectation(description: "browser handed to owner")
+        withObservationTracking { _ = PokiBrowser.shared.owner } onChange: { handedOver.fulfill() }
+        chat.send("Inspect the local fixture after the owner hands it back.")
+        await fulfillment(of: [handedOver], timeout: 20)
+        XCTAssertTrue(PokiBrowser.shared.ownerHasIt)
+        _ = try await PokiBrowser.shared.webView.callAsyncJavaScript(fill, arguments: ["values": values], in: nil, contentWorld: .page)
+        let finished = expectation(description: "chat finished after handback")
+        withObservationTracking { _ = chat.running } onChange: { finished.fulfill() }
+        PokiBrowser.shared.handBack()
+        await fulfillment(of: [finished], timeout: 30)
+
+        let calls = SessionStore.shared.record(chat.sessionID)
+        XCTAssertEqual(calls.map(\.name), ["web_handoff", "web_read", "web_click", "web_type", "web_open"])
+        XCTAssertTrue(calls.allSatisfy(\.ok))
+        XCTAssertTrue(calls.first?.answer.contains("ordinary search") == true)
+        XCTAssertTrue(calls.first?.answer.contains("(filled)") == true)
+        XCTAssertTrue(calls.first?.answer.contains("one-time code") == true)
+        XCTAssertTrue(calls.first?.answer.contains("payment card") == true)
+        XCTAssertTrue(calls.first?.answer.contains("identity document") == true)
+        XCTAssertTrue(calls.first { $0.name == "web_type" }?.answer.contains("ordinary updated search") == true)
+        XCTAssertTrue(opened.text.contains("(empty)"))
+        let requests = Self.json(server.requests)
+        XCTAssertTrue(requests.contains("The owner handed the page back."))
+        XCTAssertTrue(requests.contains("ordinary updated search"))
+        let session = try XCTUnwrap(SessionStore.shared.session(chat.sessionID))
+        let exported = String(decoding: try JSONEncoder().encode(session), as: UTF8.self)
+        let support = try XCTUnwrap(FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first)
+        let stored = try String(contentsOf: support.appendingPathComponent("Poki/Sessions/\(chat.sessionID).json"), encoding: .utf8)
+        XCTAssertTrue(stored.contains("web_handoff"))
+        let cache = try XCTUnwrap(FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first)
+        let log = try String(contentsOf: cache.appendingPathComponent("poki-log.txt"), encoding: .utf8)
+        let rawRead = try await PokiBrowser.shared.call("return window.__pokiReader.read({budget: 20000})")
+        let debug = Self.json(try XCTUnwrap(rawRead))
+        for (index, value) in values.enumerated() {
+            for (surface, text) in [("model requests", requests), ("session export", exported), ("session file", stored),
+                                    ("app log", AppLog.shared.text), ("log file", log), ("reader debug result", debug)] {
+                XCTAssertFalse(text.replacingOccurrences(of: "\\/", with: "/").contains(value), "Field \(index) leaked into \(surface)")
+            }
+        }
+    }
+
+    func testBrowserTakeOverInstructionIsSelectableAndCopyableWithLineBreaks() async throws {
+        let instruction = "Run this command and open the URL:\ncurl -fsSL https://example.com/setup.sh | sh\nhttps://example.com/verify?code=482913"
+        let browser = PokiBrowser.shared
+        browser.close()
+        _ = browser.begin("Waiting for you")
+        browser.takeOver(reason: instruction)
+
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = UIWindow(windowScene: scene)
+        window.frame = scene.screen.bounds
+        let host = UIHostingController(rootView: BrowserTakeOverSheet(running: true, stop: {}))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer {
+            window.isHidden = true
+            browser.close()
+        }
+
+        var textView: UITextView?
+        var copyButton: NSObject?
+        for _ in 0..<50 {
+            window.layoutIfNeeded()
+            CATransaction.flush()
+            textView = Self.findView(ofType: UITextView.self, in: window) { $0.text == instruction }
+            copyButton = Self.findAccessibilityButton(identifier: "browser.instruction.copy", in: window)
+            if textView != nil && copyButton != nil { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+
+        let instructionView = try XCTUnwrap(textView, "Built-in browser top instruction must render in a selectable UITextView with the verbatim instruction")
+        XCTAssertTrue(instructionView.isSelectable, "Instruction text must support standard text selection")
+        XCTAssertFalse(instructionView.isEditable, "Instruction text must remain read-only")
+        XCTAssertEqual(instructionView.text, instruction, "Multi-line commands and URLs must preserve line breaks")
+
+        let previousPasteboard = UIPasteboard.general.string
+        defer { UIPasteboard.general.string = previousPasteboard }
+
+        UIPasteboard.general.string = ""
+        instructionView.becomeFirstResponder()
+        instructionView.selectAll(nil)
+        instructionView.copy(nil)
+        XCTAssertEqual(UIPasteboard.general.string, instruction, "Standard Copy must copy the full instruction with line breaks preserved")
+
+        let button = try XCTUnwrap(copyButton, "Built-in browser instruction bar must provide a Copy button")
+        UIPasteboard.general.string = ""
+        XCTAssertTrue(button.accessibilityActivate(), "Tapping the Copy button must activate")
+        XCTAssertEqual(UIPasteboard.general.string, instruction, "Dedicated Copy button must copy the full instruction with line breaks preserved")
+    }
+
+    private static func findView<T: UIView>(ofType type: T.Type, in root: UIView, where match: (T) -> Bool) -> T? {
+        if let typed = root as? T, match(typed) { return typed }
+        for child in root.subviews {
+            if let found = findView(ofType: type, in: child, where: match) { return found }
+        }
+        return nil
+    }
+
+    private static func findAccessibilityButton(identifier: String, in root: NSObject) -> NSObject? {
+        var pending = [root]
+        var visited = Set<ObjectIdentifier>()
+        let selector = NSSelectorFromString("accessibilityIdentifier")
+        while let item = pending.popLast() {
+            guard visited.insert(ObjectIdentifier(item)).inserted else { continue }
+            let id = item.responds(to: selector) ? item.perform(selector)?.takeUnretainedValue() as? String : nil
+            if id == identifier && item.accessibilityTraits.contains(.button) { return item }
+            if let view = item as? UIView { pending.append(contentsOf: view.subviews) }
+            if let children = item.accessibilityElements { pending.append(contentsOf: children.compactMap { $0 as? NSObject }) }
+            let count = item.accessibilityElementCount()
+            if count > 0 && count < 1000 {
+                for index in 0..<count {
+                    if let child = item.accessibilityElement(at: index) as? NSObject { pending.append(child) }
+                }
+            }
+        }
+        return nil
+    }
+
+    private static let page = """
+    <!doctype html>
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Showtimes</title></head>
+    <body>
+    <h1>Showtimes</h1>
+    <p id="log"></p>
+    <button>Sign In</button>
+    <a href="#join" role="button">Create account</a>
+    <section><h2>Rated R</h2><button>I am 21 or older</button></section>
+    <form><button type="button">I agree to the Terms of Service</button></form>
+    <div id="cookie-banner" style="position:fixed;left:0;right:0;bottom:0;background:#fff;padding:12px">
+      <p>We and our partners use cookies for analytics and advertising.</p>
+      <button>Accept all</button>
+      <button onclick="this.parentElement.style.display='none'">Reject all</button>
+    </div>
+    <script>
+    for (const b of document.querySelectorAll('button, [role=button]')) {
+      b.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('log').textContent = 'Tapped: ' + b.textContent; });
+    }
+    </script>
+    </body></html>
+    """
+
+    private static let signIn = """
+    <!doctype html>
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>News</title></head>
+    <body>
+    <h1>Today's story</h1>
+    <p id="log"></p>
+    <div role="dialog" style="position:fixed;inset:0;background:#fff;padding:24px">
+      <h2>Sign in to keep reading</h2>
+      <input type="email" placeholder="Email address">
+      <button>Continue</button>
+      <button>Continue with Google</button>
+      <p>By continuing you agree to our Terms of Use and Privacy Policy.</p>
+    </div>
+    <script>
+    for (const b of document.querySelectorAll('button')) {
+      b.addEventListener('click', () => { document.getElementById('log').textContent = 'Tapped: ' + b.textContent; });
+    }
+    </script>
+    </body></html>
+    """
+
+    private static let termsNotice = """
+    <!doctype html>
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Showtimes</title></head>
+    <body>
+    <h1>Showtimes</h1>
+    <p id="log"></p>
+    <div style="position:fixed;left:0;right:0;bottom:0;background:#fff;padding:12px">
+      <p>By continuing to use this site, you agree to our Terms of Use.</p>
+      <button onclick="this.parentElement.style.display='none'">Continue</button>
+    </div>
+    <script>
+    for (const b of document.querySelectorAll('button')) {
+      b.addEventListener('click', () => { document.getElementById('log').textContent = 'Tapped: ' + b.textContent; });
+    }
+    </script>
+    </body></html>
+    """
+
+    private static let agreeToTerms = """
+    <!doctype html>
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Rewards</title></head>
+    <body>
+    <h1>Rewards</h1>
+    <p id="log"></p>
+    <div role="dialog" style="position:fixed;inset:0;background:#fff;padding:24px">
+      <h2>Before you go on</h2>
+      <label><input type="checkbox" id="terms"> I agree to the Terms of Service and Privacy Policy</label>
+      <button>Continue</button>
+    </div>
+    <script>
+    for (const b of document.querySelectorAll('button')) {
+      b.addEventListener('click', () => { document.getElementById('log').textContent = 'Tapped: ' + b.textContent; });
+    }
+    </script>
+    </body></html>
+    """
+
+    private static func ref(_ label: String, in text: String) throws -> String {
+        let pattern = "\\[(e\\d+)\\] (?:button|link|textbox|searchbox) \"" + NSRegularExpression.escapedPattern(for: label) + "\""
+        let match = try XCTUnwrap(try NSRegularExpression(pattern: pattern).firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+                                  "“\(label)” is on the page read: \(text)")
+        return String(text[Range(match.range(at: 1), in: text)!])
+    }
+
+    private static func json(_ object: Any) -> String {
+        String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self)
+    }
+}
+
+/// HTML pages on 127.0.0.1 by path; any other path is not found.
+final class PageServer: @unchecked Sendable {
+    private let listener: NWListener
+    private let queue = DispatchQueue(label: "page-server")
+    private let pages: [String: String]
+    private let delayedPath: String?
+
+    var port: UInt16 { listener.port?.rawValue ?? 0 }
+
+    init(pages: [String: String], delayedPath: String? = nil) throws {
+        self.pages = pages
+        self.delayedPath = delayedPath
+        let parameters = NWParameters.tcp
+        parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: .any)
+        listener = try NWListener(using: parameters)
+        let ready = DispatchSemaphore(value: 0)
+        listener.stateUpdateHandler = { if case .ready = $0 { ready.signal() } }
+        listener.newConnectionHandler = { [weak self] connection in self?.serve(connection) }
+        listener.start(queue: queue)
+        guard ready.wait(timeout: .now() + 5) == .success else { throw URLError(.cannotConnectToHost) }
+    }
+
+    deinit { listener.cancel() }
+
+    private func serve(_ connection: NWConnection) {
+        connection.start(queue: queue)
+        read(connection, Data())
+    }
+
+    private func read(_ connection: NWConnection, _ received: Data) {
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 1 << 16) { [weak self] data, _, done, error in
+            guard let self else { return }
+            let received = received + (data ?? Data())
+            if received.range(of: Data("\r\n\r\n".utf8)) != nil {
+                let path = String(decoding: received.prefix(64), as: UTF8.self).split(separator: " ").dropFirst().first.map(String.init) ?? "/"
+                let body = self.pages[path] ?? ""
+                let status = self.pages[path] == nil ? "404 Not Found" : "200 OK"
+                let head = "HTTP/1.1 \(status)\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: \(body.utf8.count)\r\nConnection: close\r\n\r\n"
+                let response = Data((head + body).utf8)
+                let send: @Sendable () -> Void = {
+                    connection.send(content: response, completion: .contentProcessed { _ in connection.cancel() })
+                }
+                if path == self.delayedPath {
+                    self.queue.asyncAfter(deadline: .now() + 2, execute: send)
+                } else {
+                    send()
+                }
+                return
+            }
+            if done || error != nil { return connection.cancel() }
+            self.read(connection, received)
+        }
+    }
+}

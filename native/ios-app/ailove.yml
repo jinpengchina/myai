@@ -1,0 +1,7 @@
+# The device build uses its embedded local VPN extension.
+include: project.yml
+name: ailove
+settings:
+  base:
+    CODE_SIGN_STYLE: Automatic
+    REGISTER_APP_GROUPS: YES

@@ -1,0 +1,43 @@
+name: Feature request
+description: Ask for a task or capability Poki does not handle yet, or propose a design change.
+labels: ["type:feature"]
+body:
+  - type: markdown
+    attributes:
+      value: For a large change, describe the outcome you want and what currently gets in the way.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal or use case
+      description: Describe the real task on your iPhone in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: limitation
+    attributes:
+      label: Current limitation
+      description: How Poki handles the task now, or where it stops. Include measurements for performance issues.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area in Poki
+      options:
+        - Poki iPhone app
+        - Poki MCP
+        - Poki Agent, iMessage, or Telegram
+        - Installation or Poki Setup
+        - Other or not sure
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who benefits from this change and how often it comes up.
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How it could work, and whether you plan to open a pull request.

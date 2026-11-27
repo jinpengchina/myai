@@ -1,0 +1,68 @@
+name: Install failure
+description: Installing Poki on the iPhone stopped at a step and did not get past it.
+labels: ["type:bug", "area:install"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If an agent installed Poki for you, `node bin/install-iphone.mjs issue` fills this in. Read it before you submit.
+        `node bin/install-iphone.mjs diagnose` removes passcodes, passwords, tokens, API keys, your device's name and its UDID for you. To report a vulnerability, use the private report option in this repository's Security tab.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: Expected behavior, actual behavior, any installer error code printed (for example, `trust_not_answered`), and steps you or the agent already tried.
+    validations:
+      required: true
+  - type: dropdown
+    id: step
+    attributes:
+      label: Failed installation step
+      options:
+        - Get Poki Setup
+        - Start Poki Setup
+        - Sign in with the Apple Account
+        - Find the iPhone
+        - Pair (Trust This Computer)
+        - Developer Mode
+        - Sign and install Poki
+        - Trust the developer and open Poki
+        - Relay
+        - Self-check
+        - Don't know
+    validations:
+      required: true
+  - type: dropdown
+    id: path
+    attributes:
+      label: Installation method
+      options:
+        - Agent installer (node bin/install-iphone.mjs)
+        - Poki Setup for Mac (window)
+        - Poki Setup for Windows (window)
+        - poki-setup command line
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics output
+      description: Output from `node bin/install-iphone.mjs diagnose`, or the Poki Setup log. Redact personal information and identifiers first.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Poki and Poki Setup versions
+      description: Include the host OS version, plus the Xcode version if installed.
+      placeholder: Poki Setup 0.2.1 (319) on Windows 11, Poki 0.4.4
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: iPhone model and iOS version
+      placeholder: iPhone 17 Pro, iOS 27.3
+    validations:
+      required: true

@@ -1,0 +1,73 @@
+name: Bug report
+description: Something in Poki does not work as documented (iPhone app, Poki Setup, Poki MCP, or Poki Agent).
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues in this repository first. To report a vulnerability, use the private report option in this repository's Security tab.
+        If installing Poki failed, use the **Install failure** form. If the tools work but a task in an app fails, use **Task failure**.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: Expected behavior versus actual behavior, including the exact error text.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The task or tool call and the response returned. Note whether you reproduced it more than once.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area in Poki
+      options:
+        - Poki iPhone app
+        - Poki MCP
+        - Poki Agent, iMessage, or Telegram
+        - Installation or Poki Setup
+        - Other or not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Poki version
+      description: The app version from Settings (with build and channel), or the version and commit from `poki_mcp_status`.
+      placeholder: Poki 0.2.8 (501) Alpha, or 0.1.1 f4fd51e
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: iPhone model and iOS version
+      placeholder: iPhone 17 Pro, iOS 27.3
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection method
+      options:
+        - Physical iPhone over USB
+        - Physical iPhone over LAN (RemotePairing)
+        - Physical iPhone over Tailscale or VPN
+        - iOS Simulator
+        - Not device-related
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Log lines around the failure (in the app, go to Settings > Diagnostics > Copy Log). Redact personal information such as tokens, account names, and message text first.
+      render: text
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or screen recording
+      description: Drag files here. Redact personal information before uploading.

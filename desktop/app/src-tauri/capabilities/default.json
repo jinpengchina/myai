@@ -1,0 +1,29 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "What the Poki Setup window may do.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-title",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://*"
+        },
+        {
+          "url": "ms-windows-store://*"
+        }
+      ]
+    },
+    "opener:allow-reveal-item-in-dir",
+    "dialog:default",
+    "clipboard-manager:allow-write-text",
+    "log:default"
+  ]
+}

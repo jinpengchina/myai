@@ -1,0 +1,24 @@
+name: Source checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check iPhone test installer
+        run: python3 -B -m unittest discover -s native/ios-app/scripts -p test_install_fresh_test.py
+      - name: Check source preview defaults
+        run: node --test test/source-preview-defaults.test.mjs test/release-catalog.test.mjs test/setup-app-channel.test.mjs test/setup-app-team.test.mjs test/install-download.test.mjs test/codex-voice-build.test.mjs

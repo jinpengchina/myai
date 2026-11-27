@@ -1,0 +1,397 @@
+import AVFoundation
+import Foundation
+import WebRTC
+
+/// What VoiceModel talks through: a VoiceLink in the app, a recorded conversation in tests.
+protocol VoiceConnection: AnyObject, Sendable {
+    @MainActor func connect(secret: String, base: URL?, microphone: Bool, direct: Bool) async throws
+    @MainActor func connectLive(microphone: Bool, direct: Bool, exchange: (String) async throws -> String) async throws
+    @MainActor func startOpeningCapture(session: Int) throws -> OpeningVoiceCapture?
+    @MainActor func useOpeningCapture(_ capture: OpeningVoiceCapture?)
+    @MainActor func ensureOpeningCaptureRunning(_ capture: OpeningVoiceCapture) -> Bool
+    func hasRemoteSpeech() async -> Bool
+    @discardableResult func send(_ event: [String: Any]) -> Bool
+    func setRemoteVolume(_ value: Double)
+    @MainActor func stopSendingAudio()
+    @MainActor func diagnose(_ write: @escaping @MainActor (String) -> Void)
+    @MainActor func close()
+}
+
+extension VoiceConnection {
+    func connectLive(microphone: Bool, direct: Bool, exchange: (String) async throws -> String) async throws { throw VoiceError.noWebRTC }
+    func startOpeningCapture(session: Int) throws -> OpeningVoiceCapture? { nil }
+    func useOpeningCapture(_ capture: OpeningVoiceCapture?) {}
+    @MainActor func ensureOpeningCaptureRunning(_ capture: OpeningVoiceCapture) -> Bool { capture.audio.ensureRunning() }
+    func hasRemoteSpeech() async -> Bool { false }
+}
+
+/// The microphone and speaker are WebRTC tracks. The `oai-events` data channel carries JSON events.
+/// The SDP exchange is supplied by the selected OpenAI endpoint or the Mac bridge.
+final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTCDataChannelDelegate, @unchecked Sendable {
+    private static let configureWebRTCAudioDefaults: Void = {
+        // Voice chat: echo cancellation on, so Poki's own voice from the speaker doesn't interrupt it.
+        let audio = RTCAudioSessionConfiguration.webRTC()
+        audio.category = AVAudioSession.Category.playAndRecord.rawValue
+        audio.mode = AVAudioSession.Mode.voiceChat.rawValue
+        audio.categoryOptions = [.defaultToSpeaker, .allowBluetoothHFP]
+        RTCAudioSessionConfiguration.setWebRTC(audio)
+    }()
+
+    private static let factory: RTCPeerConnectionFactory = {
+        _ = configureWebRTCAudioDefaults
+        return RTCPeerConnectionFactory()
+    }()
+    /// The second try: the same, but WebRTC leaves VPN interfaces out. A loopback VPN or a proxy app
+    /// that drops UDP otherwise takes the voice packets, and the connection never opens.
+    private static let directFactory: RTCPeerConnectionFactory = {
+        _ = factory // the audio session configuration above, set once
+        let direct = RTCPeerConnectionFactory()
+        let options = RTCPeerConnectionFactoryOptions()
+        options.ignoreVPNNetworkAdapter = true
+        options.ignoreLoopbackNetworkAdapter = true
+        direct.setOptions(options)
+        return direct
+    }()
+    #if DEBUG
+    /// Test runs: WebRTC's own audio device would set up a voice-chat audio session, and iOS would ask
+    /// for the microphone. This one never touches audio; the model's voice is received and dropped.
+    private static let silentFactory = RTCPeerConnectionFactory(encoderFactory: nil, decoderFactory: nil, audioDevice: SilentAudioDevice())
+    #endif
+
+    private let onEvent: @MainActor ([String: Any]) -> Void
+    private let onClosed: @MainActor (String) -> Void
+    private var peer: RTCPeerConnection?
+    private var channel: RTCDataChannel?
+    @MainActor private var holdsAudioSession = false
+    @MainActor private var openingCapture: OpeningVoiceCapture?
+    @MainActor private var diagnostics: (@MainActor (String) -> Void)?
+    /// WebRTC calls the delegate methods on its own threads and the app calls in from the main actor,
+    /// so these three are only touched under `lock`.
+    private let lock = NSLock()
+    private var remoteAudio: RTCAudioTrack?
+    private var volume = 1.0
+    private var closing = false
+    /// Until the connection is open, a failure is connect's to report (it may try again), not a loss.
+    private var opened = false
+
+    init(onEvent: @escaping @MainActor ([String: Any]) -> Void, onClosed: @escaping @MainActor (String) -> Void) {
+        self.onEvent = onEvent
+        self.onClosed = onClosed
+    }
+
+    @MainActor
+    static func activateAudioSession(configure: Bool) throws {
+        let session = RTCAudioSession.sharedInstance()
+        session.lockForConfiguration()
+        defer { session.unlockForConfiguration() }
+        if configure {
+            _ = configureWebRTCAudioDefaults
+            do {
+                try session.setConfiguration(RTCAudioSessionConfiguration.webRTC())
+            } catch {
+                AppLog.shared.add("voice", "RTCAudioSession configuration fallback: \(error.localizedDescription)")
+                try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetoothHFP])
+            }
+            try session.setActive(true)
+            try? session.setPreferredInputNumberOfChannels(1)
+            return
+        }
+        try session.setActive(true)
+    }
+
+    @MainActor
+    static func deactivateAudioSession(onFailure: (() -> Void)? = nil) {
+        let session = RTCAudioSession.sharedInstance()
+        session.lockForConfiguration()
+        defer { session.unlockForConfiguration() }
+        do {
+            try session.setActive(false)
+        } catch {
+            onFailure?()
+            AppLog.shared.add("voice", "could not deactivate the realtime audio session: \(error.localizedDescription)")
+        }
+    }
+
+    @MainActor func startOpeningCapture(session: Int) throws -> OpeningVoiceCapture? {
+        let audio = OpeningVoiceAudio(session: session)
+        try audio.startCapture()
+        let capture = OpeningVoiceCapture(audio: audio)
+        useOpeningCapture(capture)
+        diagnostics?("opening microphone started; \(Self.audioSession())")
+        return capture
+    }
+
+    @MainActor func useOpeningCapture(_ capture: OpeningVoiceCapture?) {
+        openingCapture = capture
+    }
+
+    /// `microphone: false` (test runs) sends no audio track and needs no microphone permission; the
+    /// model's voice still comes back.
+    /// `direct: true` keeps the connection off VPN interfaces (the retry after a try that never opened).
+    /// `base`: the Realtime API's address the secret is for, OpenAI's when nil.
+    @MainActor
+    func connect(secret: String, base: URL? = nil, microphone: Bool = true, direct: Bool = false) async throws {
+        try await connectLive(microphone: microphone, direct: direct) { sdp in
+            var request = URLRequest(url: (base ?? URL(string: "https://api.openai.com/v1")!).appending(path: "realtime/calls"), timeoutInterval: 20)
+            request.httpMethod = "POST"
+            request.setValue("Bearer \(secret)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/sdp", forHTTPHeaderField: "Content-Type")
+            request.httpBody = Data(sdp.utf8)
+            let (data, response) = try await URLSession.shared.data(for: request)
+            let answer = String(decoding: data, as: UTF8.self)
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                throw VoiceError.realtime(http.statusCode, String(answer.prefix(300)))
+            }
+            return answer
+        }
+    }
+
+    @MainActor
+    func connectLive(microphone: Bool, direct: Bool, exchange: (String) async throws -> String) async throws {
+        let factory: RTCPeerConnectionFactory
+        if let openingCapture {
+            factory = openingCapture.factory
+            if direct {
+                let options = RTCPeerConnectionFactoryOptions()
+                options.ignoreVPNNetworkAdapter = true
+                options.ignoreLoopbackNetworkAdapter = true
+                factory.setOptions(options)
+            }
+        } else {
+        #if DEBUG
+            factory = !microphone ? Self.silentFactory : direct ? Self.directFactory : Self.factory
+        #else
+            factory = direct ? Self.directFactory : Self.factory
+        #endif
+        }
+        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
+        let config = RTCConfiguration()
+        config.sdpSemantics = .unifiedPlan
+        // A public address of our own as well, so the path opens behind NAT that host addresses alone
+        // do not get through.
+        config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302", "stun:stun.cloudflare.com:3478"])]
+        config.continualGatheringPolicy = .gatherContinually
+        guard let peer = factory.peerConnection(with: config, constraints: constraints, delegate: self) else { throw VoiceError.noWebRTC }
+        self.peer = peer
+        if microphone {
+            let needsConfiguration = openingCapture == nil || !RTCAudioSession.sharedInstance().isActive
+            try Self.activateAudioSession(configure: needsConfiguration)
+            holdsAudioSession = true
+            let mic = factory.audioTrack(with: factory.audioSource(with: constraints), trackId: "poki-mic")
+            peer.add(mic, streamIds: ["poki-voice"])
+            diagnostics?("microphone track enabled; \(Self.audioSession())")
+        } else {
+            let receiveOnly = RTCRtpTransceiverInit()
+            receiveOnly.direction = .recvOnly
+            peer.addTransceiver(of: .audio, init: receiveOnly)
+        }
+        let channel = peer.dataChannel(forLabel: "oai-events", configuration: RTCDataChannelConfiguration())
+        channel?.delegate = self
+        self.channel = channel
+
+        let offer: RTCSessionDescription = try await withCheckedThrowingContinuation { done in
+            peer.offer(for: constraints) { sdp, error in
+                if let sdp { done.resume(returning: sdp) } else { done.resume(throwing: error ?? VoiceError.noOffer) }
+            }
+        }
+        try await withCheckedThrowingContinuation { (done: CheckedContinuation<Void, Error>) in
+            peer.setLocalDescription(offer) { error in if let error { done.resume(throwing: error) } else { done.resume() } }
+        }
+        let answer = try await exchange(offer.sdp)
+        // The largest event the data channel takes (64 KiB when the answer names none): a screenshot must fit.
+        let size = answer.range(of: #"a=max-message-size:\d+"#, options: .regularExpression).map { answer[$0].dropFirst(19) } ?? "none named"
+        await MainActor.run { AppLog.shared.add("voice", "data channel max-message-size: \(size)") }
+        try await withCheckedThrowingContinuation { (done: CheckedContinuation<Void, Error>) in
+            peer.setRemoteDescription(RTCSessionDescription(type: .answer, sdp: answer)) { error in if let error { done.resume(throwing: error) } else { done.resume() } }
+        }
+        let deadline = Date().addingTimeInterval(12)
+        while channel?.readyState != .open {
+            if Date() > deadline || peer.connectionState == .failed { throw VoiceError.noPath(Self.describe(peer.iceConnectionState)) }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        lock.withLock { opened = true }
+        if microphone { diagnoseCapture() }
+    }
+
+    func hasRemoteSpeech() async -> Bool {
+        guard let peer else { return false }
+        return await withCheckedContinuation { done in
+            peer.statistics { report in
+                done.resume(returning: report.statistics.values.contains { stat in
+                    stat.type == "inbound-rtp" && (stat.values["kind"] as? String) == "audio"
+                        && (stat.values["audioLevel"] as? Double ?? 0) > 0.005
+                })
+            }
+        }
+    }
+
+    private static func describe(_ state: RTCIceConnectionState) -> String {
+        switch state {
+        case .new: "new"
+        case .checking: "checking"
+        case .connected: "connected"
+        case .completed: "completed"
+        case .failed: "failed"
+        case .disconnected: "disconnected"
+        case .closed: "closed"
+        default: "unknown"
+        }
+    }
+
+    /// The shared audio session: category, mode, routes, and whether WebRTC counts it active.
+    static func audioSession() -> String {
+        let av = AVAudioSession.sharedInstance()
+        return "audio session \(av.category.rawValue) \(av.mode.rawValue), input available \(av.isInputAvailable), input channels \(av.inputNumberOfChannels), input \(av.currentRoute.inputs.map { $0.portType.rawValue }.joined(separator: ", ")), output \(av.currentRoute.outputs.map { $0.portType.rawValue }.joined(separator: ", ")), webrtc active \(RTCAudioSession.sharedInstance().isActive), record permission \(AVAudioApplication.shared.recordPermission == .granted)"
+    }
+
+    @MainActor
+    func diagnose(_ write: @escaping @MainActor (String) -> Void) {
+        diagnostics = write
+    }
+
+    /// A source with zero totalSamplesDuration has captured nothing, whatever the room sounds like.
+    @MainActor private func diagnoseCapture() {
+        guard let write = diagnostics else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let peer = self?.peer else { return }
+            peer.statistics { report in
+                var parts: [String] = []
+                for stat in report.statistics.values where (stat.values["kind"] as? String) == "audio" {
+                    let value = { (key: String) in stat.values[key].map { "\($0)" } ?? "none" }
+                    switch stat.type {
+                    case "media-source":
+                        parts.append("captured \(value("totalSamplesDuration")) s, level \(value("audioLevel"))")
+                    case "outbound-rtp":
+                        parts.append("sent \(value("bytesSent")) bytes in \(value("packetsSent")) packets")
+                    default: break
+                    }
+                }
+                let line = "microphone after 3 s: " + (parts.isEmpty ? "no audio stats" : parts.joined(separator: "; "))
+                Task { @MainActor in write(line) }
+            }
+        }
+    }
+
+    @discardableResult
+    func send(_ event: [String: Any]) -> Bool {
+        guard let channel, channel.readyState == .open, let data = try? JSONSerialization.data(withJSONObject: event) else { return false }
+        return channel.sendData(RTCDataBuffer(data: data, isBinary: false))
+    }
+
+    /// Detach microphone tracks immediately while the data channel awaits a final close receipt.
+    @MainActor func stopSendingAudio() {
+        for sender in peer?.senders ?? [] where sender.track is RTCAudioTrack {
+            sender.track?.isEnabled = false
+            sender.track = nil
+        }
+    }
+
+    /// 0 mutes Poki's voice (silent test runs); 1 is normal.
+    func setRemoteVolume(_ value: Double) {
+        lock.withLock {
+            volume = value
+            remoteAudio?.source.volume = value
+            remoteAudio?.isEnabled = value > 0
+        }
+    }
+
+    @MainActor
+    func close() {
+        lock.withLock { closing = true }
+        channel?.close()
+        peer?.close()
+        channel = nil
+        peer = nil
+        // An interruption can make the session inactive before we give up our activation.
+        guard holdsAudioSession else { return }
+        holdsAudioSession = false
+        diagnostics?("microphone track closed")
+        Self.deactivateAudioSession { [weak self] in
+            self?.diagnostics?("audio session release failed")
+        }
+    }
+
+    private func lost(_ reason: String) {
+        let first = lock.withLock { () -> Bool in
+            guard !closing, opened else { return false }
+            closing = true
+            return true
+        }
+        guard first else { return }
+        let onClosed = onClosed
+        Task { @MainActor in onClosed(reason) }
+    }
+
+    // MARK: RTCDataChannelDelegate
+
+    func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
+        if dataChannel.readyState == .closed { lost("the data channel closed") }
+    }
+
+    func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
+        guard let event = try? JSONSerialization.jsonObject(with: buffer.data) as? [String: Any] else { return }
+        let onEvent = onEvent
+        Task { @MainActor in onEvent(event) }
+    }
+
+    // MARK: RTCPeerConnectionDelegate
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCPeerConnectionState) {
+        switch newState {
+        case .failed: lost("the network path failed")
+        case .disconnected:
+            // ICE often recovers from a short gap by itself; give it a few seconds before giving up.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self, weak peerConnection] in
+                if let peerConnection, peerConnection.connectionState != .connected { self?.lost("the network dropped") }
+            }
+        default: break
+        }
+    }
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {
+        guard let track = rtpReceiver.track as? RTCAudioTrack else { return }
+        lock.withLock {
+            remoteAudio = track
+            track.source.volume = volume
+            track.isEnabled = volume > 0
+        }
+    }
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {}
+    func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {}
+}
+
+#if DEBUG
+/// An audio device with no microphone and no speaker, for silent test runs (development builds only).
+private final class SilentAudioDevice: NSObject, RTCAudioDevice {
+    let deviceInputSampleRate = 48000.0
+    let inputIOBufferDuration: TimeInterval = 0.01
+    let inputNumberOfChannels = 1
+    let inputLatency: TimeInterval = 0
+    let deviceOutputSampleRate = 48000.0
+    let outputIOBufferDuration: TimeInterval = 0.01
+    let outputNumberOfChannels = 1
+    let outputLatency: TimeInterval = 0
+    private(set) var isInitialized = false
+    private(set) var isPlayoutInitialized = false
+    private(set) var isPlaying = false
+    private(set) var isRecordingInitialized = false
+    private(set) var isRecording = false
+
+    func initialize(with delegate: RTCAudioDeviceDelegate) -> Bool { isInitialized = true; return true }
+    func terminateDevice() -> Bool { isInitialized = false; isPlaying = false; isRecording = false; return true }
+    func initializePlayout() -> Bool { isPlayoutInitialized = true; return true }
+    func startPlayout() -> Bool { isPlaying = true; return true }
+    func stopPlayout() -> Bool { isPlaying = false; return true }
+    func initializeRecording() -> Bool { isRecordingInitialized = true; return true }
+    func startRecording() -> Bool { isRecording = true; return true }
+    func stopRecording() -> Bool { isRecording = false; return true }
+}
+#endif
