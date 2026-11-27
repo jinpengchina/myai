@@ -1,10 +1,14 @@
 # myai
 
+<img src="docs/images/myai-icon.png" width="120" alt="Black-and-white myai logo">
+
 myai is a developer-preview iPhone assistant based on [Poki](https://github.com/JosssphZhou/poki), by Joseph Zhou and its contributors. It can read the active screen and interact with apps on an iPhone you own and set up. Use your own model account.
 
 myai adds an automatic built-in VPN connection for this iPhone, a one-page first-run checklist with a black background and English labels, and continuous voice with visible task progress.
 
-[简体中文](README.zh-CN.md) · [Privacy](PRIVACY.md) · [Contributing](CONTRIBUTING.md)
+[Build for your iPhone](#build-for-your-iphone) · [简体中文](README.zh-CN.md) · [Privacy](PRIVACY.md) · [Contributing](CONTRIBUTING.md)
+
+[![myai one-page setup concept showing the built-in VPN, device pairing, voice account, UI Automation, and microphone checklist](docs/images/myai-setup-checklist.png)](docs/images/myai-setup-checklist.png)
 
 ## Build for your iPhone
 
