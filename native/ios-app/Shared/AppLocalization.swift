@@ -2,7 +2,12 @@ import Foundation
 import Observation
 
 enum AppBrand {
-    nonisolated static let name = "ailove"
+    nonisolated static let name = "myai"
+
+    /// Older activity and screen-history records can identify this app by a previous display name.
+    nonisolated static func matchesDisplayName(_ value: String) -> Bool {
+        [name, "ailove", "Poki"].contains { value.caseInsensitiveCompare($0) == .orderedSame }
+    }
 }
 
 /// One language for Poki-owned UI. System UI keeps iOS's per-app language, and stored conversation

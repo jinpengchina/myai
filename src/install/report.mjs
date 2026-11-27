@@ -118,8 +118,8 @@ export async function issueDraft({ state }) {
   const step = manifest.steps.find(s => s.id === stepId);
   const title = `Install stops at ${step?.title ?? stepId}: ${code}`;
   const phone = bundle.phones?.[0];
-  const stepLabel = { setup_app: 'Get Poki Setup', bridge: 'Start Poki Setup', channel: 'Start Poki Setup', apple_account: 'Sign in with the Apple Account', phone: 'Find the iPhone', open_poki: 'Trust the developer and open Poki', relay: 'Relay', check: 'Self-check' }[stepId]
-    ?? (stepId === 'install' ? { trust_not_answered: 'Pair (Trust This Computer)', developer_mode_off: 'Developer Mode' }[code] ?? 'Sign and install Poki' : "Don't know");
+  const stepLabel = { setup_app: 'Get Poki Setup', bridge: 'Start Poki Setup', channel: 'Start Poki Setup', apple_account: 'Sign in with the Apple Account', phone: 'Find the iPhone', open_poki: 'Trust the developer and open the app', relay: 'Relay', check: 'Self-check' }[stepId]
+    ?? (stepId === 'install' ? { trust_not_answered: 'Pair (Trust This Computer)', developer_mode_off: 'Developer Mode' }[code] ?? 'Sign and install the app' : "Don't know");
   // Headings are the install-failure template's labels, so the draft reads like a form submission.
   const body = [
     '<!-- Drafted by node bin/install-iphone.mjs issue. Identifiers and secrets were removed; read it before you submit. -->',
@@ -130,7 +130,7 @@ export async function issueDraft({ state }) {
     '### Failed installation step', '', stepLabel, '',
     '### Installation method', '', 'Agent installer (node bin/install-iphone.mjs)', '',
     '### Diagnostics output', '', '```json', JSON.stringify(bundle, null, 2), '```', '',
-    '### Poki and Poki Setup versions', '',
+    '### App and installer versions', '',
     `Poki installer ${bundle.installer ? installerLabel(bundle.installer) : 'unknown'}; Poki Setup ${bundle.poki_setup ?? 'unknown'} (channel ${bundle.channel ?? 'unknown'}); Poki ${bundle.poki ?? 'not installed'}; macOS ${bundle.system.macos} ${bundle.system.arch}; Xcode: ${bundle.system.xcode}`, '',
     '### iPhone model and iOS version', '',
     `${phone?.product_type ?? 'iPhone unknown'} on iOS ${phone?.ios ?? 'unknown'}${phone?.build ? ` (${phone.build})` : ''} over ${phone?.link ?? 'unknown'}`,

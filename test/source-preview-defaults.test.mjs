@@ -18,9 +18,11 @@ function environment(t, values) {
 
 test('the source preview has no trusted publisher, network update, or installer download', async t => {
   environment(t, {
-    AILOVE_LEGACY_RELEASE_REPO: '',
-    AILOVE_LEGACY_SETUP_TEAM_IDS: '',
+    MYAI_LEGACY_RELEASE_REPO: '',
+    MYAI_LEGACY_SETUP_TEAM_IDS: '',
     POKI_RELEASE_REPO: 'upstream/poki',
+    AILOVE_LEGACY_RELEASE_REPO: 'former/preview',
+    AILOVE_LEGACY_SETUP_TEAM_IDS: 'TESTTEAM01',
     POKI_NO_UPDATE_CHECK: '',
   });
   const fetch = t.mock.method(globalThis, 'fetch', () => assert.fail('Unexpected network request'));
@@ -37,13 +39,35 @@ test('the source preview has no trusted publisher, network update, or installer 
 });
 
 test('an explicitly set release repository accepts only owner and repository path segments', t => {
-  environment(t, { AILOVE_LEGACY_RELEASE_REPO: '' });
+  environment(t, { MYAI_LEGACY_RELEASE_REPO: '' });
   for (const unsafe of ['example.com/u/repo', 'https://example.com/u/repo', 'example/../x', 'example/.', 'example/..', 'u/r?admin=true', 'u/%2Er', 'u//r']) {
-    process.env.AILOVE_LEGACY_RELEASE_REPO = unsafe;
+    process.env.MYAI_LEGACY_RELEASE_REPO = unsafe;
     assert.equal(releaseRepository(), undefined);
   }
-  process.env.AILOVE_LEGACY_RELEASE_REPO = ' example-org/my.ailove_fork ';
-  assert.equal(releaseRepository(), 'example-org/my.ailove_fork');
+  process.env.MYAI_LEGACY_RELEASE_REPO = ' example-org/my.myai_fork ';
+  assert.equal(releaseRepository(), 'example-org/my.myai_fork');
+});
+
+test('former explicit release settings remain readable and MYAI takes precedence', t => {
+  environment(t, {
+    MYAI_LEGACY_RELEASE_REPO: '',
+    MYAI_LEGACY_SETUP_TEAM_IDS: '',
+    AILOVE_LEGACY_RELEASE_REPO: 'owner/former-preview',
+    AILOVE_LEGACY_SETUP_TEAM_IDS: 'TESTTEAM01',
+  });
+  assert.equal(releaseRepository(), undefined);
+  assert.equal(pokiTeamOf('TeamIdentifier=TESTTEAM01'), null);
+
+  delete process.env.MYAI_LEGACY_RELEASE_REPO;
+  delete process.env.MYAI_LEGACY_SETUP_TEAM_IDS;
+  assert.equal(releaseRepository(), 'owner/former-preview');
+  assert.equal(pokiTeamOf('TeamIdentifier=TESTTEAM01'), 'TESTTEAM01');
+
+  process.env.MYAI_LEGACY_RELEASE_REPO = 'owner/myai';
+  process.env.MYAI_LEGACY_SETUP_TEAM_IDS = 'TESTTEAM02';
+  assert.equal(releaseRepository(), 'owner/myai');
+  assert.equal(pokiTeamOf('TeamIdentifier=TESTTEAM01'), null);
+  assert.equal(pokiTeamOf('TeamIdentifier=TESTTEAM02'), 'TESTTEAM02');
 });
 
 test('the legacy CLI asks for explicit configuration before launching a device helper', async () => {
@@ -52,12 +76,12 @@ test('the legacy CLI asks for explicit configuration before launching a device h
   for (const command of ['run', '--update-only']) {
     await assert.rejects(
       exec(process.execPath, [cli, command, '--json', '--bridge', '/fixture/nonexistent-helper'], {
-        env: { ...process.env, AILOVE_LEGACY_RELEASE_REPO: '', POKI_INSTALL_ANY_NODE: '1' },
+        env: { ...process.env, MYAI_LEGACY_RELEASE_REPO: '', POKI_INSTALL_ANY_NODE: '1' },
       }),
       error => {
         assert.equal(error.code, 2);
         assert.equal(JSON.parse(error.stdout).code, 'setup_download_failed');
-        assert.match(error.stdout, /Install ailove from source with Xcode/);
+        assert.match(error.stdout, /Install myai from source with Xcode/);
         return true;
       },
     );

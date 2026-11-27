@@ -275,7 +275,7 @@ struct Issue: Identifiable {
                       (runner.state == "waiting_network" && runner.code != "pairing_port" && !model.loopback.isWorking)
                       || (!model.loopback.isWorking && model.loopback.state != .checking) {
                 out.append(Issue(id: "loopback", title: AppLocalization.text(LocalizedStringResource("Loopback is off")),
-                                 text: AppLocalization.text(LocalizedStringResource("Connect the built-in VPN in ailove Setup.")), fix: .setup))
+                                 text: AppLocalization.text(LocalizedStringResource("Connect the built-in VPN in myai Setup.")), fix: .setup))
             }
             if let trouble = model.pairingTrouble {
                 let reason = Self.localizedPairingReason(trouble)

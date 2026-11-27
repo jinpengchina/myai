@@ -52,7 +52,7 @@ PokiCore (Swift, `native/ios/PokiCore`) and PokiLauncher (Rust with a C ABI, `na
 ## Build
 
 See the [local build and signing instructions](../../README.md#build-for-your-iphone)
-for the supported ailove developer preview.
+for the supported myai developer preview.
 
 Use Xcode 27.1 or later to build and test on iPhone Duo. The iOS 27.1 SDK lets the app extend to the
 edges of the unfolded display. In Split View, Poki sizes its chat and conversations drawer to the
@@ -61,7 +61,7 @@ space assigned by the system. The iOS deployment target remains unchanged.
 A build made with an earlier SDK is letterboxed on both of the Duo's displays. Poki's own screen is
 then the letterbox while the picture it takes is the whole panel, so every screen read is refused
 (`duo_needs_ios_27_1_sdk_build`, before that `screenshot_does_not_match_active_display`, #419). The
-ailove iPhone Duo builds therefore require the iOS 27.1 SDK or later.
+myai iPhone Duo builds therefore require the iOS 27.1 SDK or later.
 
 `native/ios-app/scripts/app-tests.sh SIMULATOR_UDID` builds `PokiTests` and runs it inside Poki on a booted simulator (the in-process transport's clipboard and session answers).
 
@@ -199,7 +199,7 @@ with a trusted certificate. Screenshot requests to the bridge do not follow redi
   A conversation never waits for the server for ever: when it owes something (the end of the person's
   speech, an answer, the end of the audio) and the server says nothing for 60 s, or 30 s after Poki went
   to the background, it ends. A step that is running is not counted; its result starts a new wait.
-- An `ailove://voice` link, from a web page or another app, only opens Voice: a link never
+- An `myai://voice` link, from a web page or another app, only opens Voice: a link never
   changes the bridge and never turns on the microphone. The person enters the address and taps Talk
   to Poki.
 - Development builds only: the launch argument `-pokiVoiceLink "poki://voice?bridge=<address>&test=1-20"`
@@ -217,9 +217,9 @@ your developer team.
 
 ## Built-in local connection
 
-First-run setup starts the embedded VPN as soon as it opens. If iOS asks to add the configuration, tap **Allow**. Setup advances automatically once the phone's services answer through ailove's tunnel. If permission is declined, the setup page offers **Try Again**. Upgrading migrates an existing external VPN preference to the built-in provider.
+First-run setup starts the embedded VPN as soon as it opens. If iOS asks to add the configuration, tap **Allow**. Setup advances automatically once the phone's services answer through myai's tunnel. If permission is declined, the setup page offers **Try Again**. Upgrading migrates an existing external VPN preference to the built-in provider.
 
-The tunnel routes local IPv4 TCP traffic for `10.7.0.1/32`. The phone keeps its normal internet and DNS routing. iOS may switch away from another active VPN when it starts ailove's tunnel. Validate the packet tunnel on a physical iPhone.
+The tunnel routes local IPv4 TCP traffic for `10.7.0.1/32`. The phone keeps its normal internet and DNS routing. iOS may switch away from another active VPN when it starts myai's tunnel. Validate the packet tunnel on a physical iPhone.
 
 ## iPad, iPhone Duo: Poki beside the app it drives
 
@@ -252,7 +252,7 @@ app are currently unsupported.
 ## Pairing by iOS version, and the pairing file's life
 
 On iOS 27 and later (`SetupStep.onDevicePairing`), tap **Open Settings** when the pairing host is
-ready, then choose **Privacy & Security → Developer Mode → Pair with ailove**. The app generates the
+ready, then choose **Privacy & Security → Developer Mode → Pair with myai**. The app generates the
 code when Settings begins the pairing exchange. The code appears on the pairing page and in the
 Dynamic Island. Enter it in the active Settings prompt. On earlier iOS versions, pair from a computer with
 Poki Setup (or pymobiledevice3, jitterbugpair, StikPair), then send the file to the phone.
@@ -278,7 +278,7 @@ Install and launch
 
 Setup
 - [ ] Each step opens in turn; Open Settings starts a Live Activity with the step number and what to tap.
-- [ ] Loopback: the status changes within 3 s when ailove’s built-in VPN connects or disconnects.
+- [ ] Loopback: the status changes within 3 s when myai’s built-in VPN connects or disconnects.
 - [ ] Pairing: the code shows in the Live Activity and in Poki; the step ticks.
 - [ ] Let Poki stay on: Allow location shows iOS's prompt; Live Activities show as on.
 

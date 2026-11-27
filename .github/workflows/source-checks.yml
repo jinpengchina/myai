@@ -1,4 +1,4 @@
-name: Source checks
+name: myai source checks
 
 on:
   pull_request:

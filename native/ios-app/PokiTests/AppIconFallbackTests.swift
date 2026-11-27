@@ -15,7 +15,7 @@ final class AppIconFallbackTests: XCTestCase {
 
     func testAnEmptyInstalledIconCanUseThePlaceholder() {
         let store = AppIconStore(installed: { _, _ in self.picture(nil) })
-        XCTAssertNil(store.icon("org.ailove.missing-fixture"))
+        XCTAssertNil(store.icon("org.myai.missing-fixture"))
         XCTAssertNil(AppIconStore.carried("taobao"))
     }
 

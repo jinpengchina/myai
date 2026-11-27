@@ -101,7 +101,7 @@ final class LoopbackTunnel {
         state = .failed(message)
         throw failure(message)
         #else
-        guard let providerID else { throw failure("The built-in VPN is unavailable in this installation. Reinstall the signed ailove app.") }
+        guard let providerID else { throw failure("The built-in VPN is unavailable in this installation. Reinstall the signed myai app.") }
         guard !busy else { throw failure("A local connection change is already in progress. Try again when it finishes.") }
         busy = true
         defer { busy = false; stopAfterBringUp = false }

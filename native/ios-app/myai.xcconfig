@@ -1,0 +1,7 @@
+// Unsigned Simulator builds use this identifier unless the developer supplies their own.
+AILOVE_BUNDLE_ID = org.myai.development
+
+// Keep local configurations from the previous project name working.
+#include? "ailove.local.xcconfig"
+MYAI_BUNDLE_ID = $(AILOVE_BUNDLE_ID)
+#include? "myai.local.xcconfig"

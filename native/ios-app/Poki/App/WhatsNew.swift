@@ -70,8 +70,8 @@ enum WhatsNewCatalog {
                 symbol: "play.rectangle",
                 title: WhatsNewText(
                     en: "Ask While Watching Videos",
-                    zhHans: "边看视频边问 ailove",
-                    zhHant: "邊看影片邊問 ailove"
+                    zhHans: "边看视频边问 myai",
+                    zhHant: "邊看影片邊問 myai"
                 ),
                 summary: WhatsNewText(
                     en: "On iOS 27+, share your screen so live voice hears other apps and answers as you watch.",
@@ -116,7 +116,7 @@ enum WhatsNewCatalog {
                     zhHant: "任務卡片展示記憶與技能"
                 ),
                 summary: WhatsNewText(
-                    en: "Task cards show which memories and skills ailove used, learning accurately from successful runs.",
+                    en: "Task cards show which memories and skills myai used, learning accurately from successful runs.",
                     zhHans: "任务卡片直标复用记忆与技能，越用越懂你的常用习惯。",
                     zhHant: "任務卡片直標複用記憶與技能，越用越懂你的常用習慣。"
                 )

@@ -2,7 +2,7 @@ import Foundation
 
 typealias PokiState = PokiActivityAttributes.ContentState
 
-/// Shared presentation sizes for the ailove mark in a Live Activity.
+/// Shared presentation sizes for the myai mark in a Live Activity.
 enum ActivityBear: String, Hashable {
     case phone, needs, turn, done, tripped, ready, paused, thinking, checking
 
@@ -119,13 +119,13 @@ struct ActivityFace: Hashable {
 /// Where a tap on the Live Activity goes, handled by RootView's onOpenURL.
 enum ActivityLink {
     /// The chat that runs the agent (also approvals and handoffs, which the chat shows).
-    static let chat = URL(string: "ailove://chat")!
+    static let chat = URL(string: "myai://chat")!
     /// A tap on the Live Activity while a run, approval, hand-off or talk is active.
-    static let activity = URL(string: "ailove://activity")!
+    static let activity = URL(string: "myai://activity")!
     /// The Activity Log, where a problem's details are.
-    static let log = URL(string: "ailove://log")!
+    static let log = URL(string: "myai://log")!
     static func setup(_ step: String? = nil) -> URL {
-        URL(string: step.map { "ailove://setup?step=\($0)" } ?? "ailove://setup")!
+        URL(string: step.map { "myai://setup?step=\($0)" } ?? "myai://setup")!
     }
 }
 
@@ -403,7 +403,7 @@ extension PokiState {
     private static func problemPresentation(for headline: String) -> (String, String) {
         switch headline {
         case "Loopback Off", "Turn On Loopback", "Can’t Reach iPhone":
-            return (String(activity: "Turn On Loopback"), String(activity: "Open ailove to connect its built-in VPN."))
+            return (String(activity: "Turn On Loopback"), String(activity: "Open myai to connect its built-in VPN."))
         case "No Internet", "Connect to the Internet":
             return (String(activity: "Connect to the Internet"), String(activity: "Poki needs it once after each restart, then tries again."))
         case "Disk Image Outdated", "Update the Disk Image":
@@ -413,7 +413,7 @@ extension PokiState {
         case "Pairing Refused", "Pair Again":
             return (String(activity: "Pair Again"), String(activity: "In Poki's setup."))
         case "Loopback or Pairing":
-            return (String(activity: "Turn On Loopback"), String(activity: "Check the built-in VPN and pairing in ailove."))
+            return (String(activity: "Turn On Loopback"), String(activity: "Check the built-in VPN and pairing in myai."))
         case "Developer Mode Off", "Check Developer Mode", "Turn On Developer Mode":
             return (String(activity: "Turn On Developer Mode"), String(activity: "Privacy & Security › Developer Mode, then restart."))
         case "Poki Runner Missing", "Poki Runner Didn’t Start", "Install Poki Runner":
@@ -434,7 +434,7 @@ extension PokiState {
         case "Developer Mode", "Turn On Developer Mode":
             return (String(activity: "Turn On Developer Mode"), String(activity: "Privacy & Security › Developer Mode. Restart, then tap Turn On."))
         case "Loopback", "Turn On Loopback":
-            return (String(activity: "Turn On Loopback"), String(activity: "Open ailove to connect its built-in VPN."))
+            return (String(activity: "Turn On Loopback"), String(activity: "Open myai to connect its built-in VPN."))
         case "Pairing", "Pair This iPhone":
             return (String(activity: "Pair This iPhone"), String(activity: "Privacy & Security › Developer Mode › Pair with Poki."))
         case "UI Automation", "Allow UI Automation":

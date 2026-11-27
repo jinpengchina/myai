@@ -47,7 +47,7 @@ final class QuickSetupUITests: XCTestCase {
         let textChat = app.buttons["firstRun.finishLater"]
         XCTAssertTrue(retry.waitForExistence(timeout: 18))
         let heading = app.descendants(matching: .any)["firstRun.checklist"].firstMatch
-        XCTAssertEqual(heading.label, "Set up ailove")
+        XCTAssertEqual(heading.label, "Set up myai")
         let steps = [("vpn", "Built-in VPN"), ("pairing", "Device pairing"), ("voice", "Voice account"),
                      ("controls", "UI Automation"), ("microphone", "Microphone")]
         for (id, title) in steps {

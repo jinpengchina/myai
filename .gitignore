@@ -28,4 +28,5 @@ DerivedData/
 *.ipa
 pairing.plist
 pairing-phone.plist
+myai.local.xcconfig
 ailove.local.xcconfig

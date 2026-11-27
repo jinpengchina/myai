@@ -53,7 +53,7 @@ final class AppModel {
         return nil
     }
     private func pairingOutput(for attempt: UUID) -> URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent("ailove-pair-\(attempt.uuidString).plist")
+        FileManager.default.temporaryDirectory.appendingPathComponent("myai-pair-\(attempt.uuidString).plist")
     }
     private(set) var problem: String?
     /// The text the local connection last put in `problem` (another VPN is on), so only that is cleared.
@@ -382,7 +382,7 @@ final class AppModel {
             else { storage.defaults.removeObject(forKey: Self.firstRunVPNRetryKey) }
         }
     }
-    private static let vpnUnavailable = "The built-in VPN is unavailable in this installation. Reinstall the signed ailove app."
+    private static let vpnUnavailable = "The built-in VPN is unavailable in this installation. Reinstall the signed myai app."
     private static let vpnOff = "The built-in VPN is off. Open Setup to connect."
 
     init(launcher: RunnerLauncher = RustLauncher(), pairer: DevicePairing = RustPairing(),
@@ -978,7 +978,7 @@ final class AppModel {
 
     /// The one thing to do for the local connection, for the person, as the installer says it.
     var loopbackSentence: String {
-        isLocalVPNAvailable ? "Connect the built-in VPN in ailove Setup." : Self.vpnUnavailable
+        isLocalVPNAvailable ? "Connect the built-in VPN in myai Setup." : Self.vpnUnavailable
     }
 
     /// The agent runner and Screen History need to hear when the local connection changes.
@@ -1205,7 +1205,8 @@ final class AppModel {
                 let code = (error as? SignerError)?.code
                 if code == "pairing" {
                     if self.pairingTrouble == nil { self.log.add("pairing", "check: refused: \(text)") }
-                    self.pairingTrouble = text.replacingOccurrences(of: " Pair again in Poki's setup.", with: "")
+                    self.pairingTrouble = text.replacingOccurrences(of: " Pair again in myai's setup.", with: "")
+                        .replacingOccurrences(of: " Pair again in Poki's setup.", with: "")
                     return false
                 }
                 // iOS 27 and later take only a pairing made on the phone over the loopback: a lockdown
@@ -1369,7 +1370,7 @@ final class AppModel {
         content.title = AppLocalization.text(LocalizedStringResource("Open Poki Again to Start Another Task"))
         content.body = AppLocalization.text(LocalizedStringResource("Poki closed after you stopped it. Open it to turn it on again."))
         content.interruptionLevel = .timeSensitive
-        content.userInfo = ["poki_link": "ailove://chat"]
+        content.userInfo = ["poki_link": "myai://chat"]
         content.sound = .default
         // Shown at once (the delegate shows banners while Poki is open too); Poki leaves only after
         // iOS has taken the notification, so an exit cannot drop it.
@@ -1399,7 +1400,7 @@ final class AppModel {
         content.title = AppLocalization.text(LocalizedStringResource("Tap to Open Poki"))
         content.body = AppLocalization.text(LocalizedStringResource("Poki restarted so agents can see the screen again. It turns on when it opens."))
         content.interruptionLevel = .timeSensitive
-        content.userInfo = ["poki_link": "ailove://chat"]
+        content.userInfo = ["poki_link": "myai://chat"]
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "nz.zheha.poki.relaunch", content: content,
                                                                       trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)))
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -1741,7 +1742,7 @@ final class AppModel {
         content.body = AppLocalization.text(LocalizedStringResource("\(agent) used this iPhone through Poki. Open Poki to see what it did."))
         content.sound = .default
         content.interruptionLevel = .timeSensitive
-        content.userInfo = ["poki_link": "ailove://chat"]
+        content.userInfo = ["poki_link": "myai://chat"]
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "poki-agent-done-\(agent)", content: content, trigger: nil))
     }
 
@@ -2380,7 +2381,7 @@ final class AppModel {
         content.sound = .default
         if timeSensitive {
             content.interruptionLevel = .timeSensitive
-            content.userInfo = ["poki_link": "ailove://chat"]
+            content.userInfo = ["poki_link": "myai://chat"]
         }
         content.threadIdentifier = "chat"
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "poki-reply", content: content, trigger: nil))
@@ -2665,7 +2666,7 @@ final class AppModel {
     var pairingNote: String?
 
     /// A link that would change the relay or the pairing file waits here for the owner's answer. Any web
-    /// page, message, code or app can open a `ailove://` link, so such a link alone never changes either.
+    /// page, message, code or app can open a `myai://` link, so such a link alone never changes either.
     struct LinkAsk: Identifiable {
         enum Kind {
             case relay(RelayAddress)

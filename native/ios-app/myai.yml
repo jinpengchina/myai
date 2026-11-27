@@ -1,6 +1,6 @@
 # The device build uses its embedded local VPN extension.
 include: project.yml
-name: ailove
+name: myai
 settings:
   base:
     CODE_SIGN_STYLE: Automatic

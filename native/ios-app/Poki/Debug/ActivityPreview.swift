@@ -189,7 +189,7 @@ struct ActivityPreview: View {
         idle.runnerPaused = true
         ready.runnerPaused = false
 
-        let title = AppModel.problemText(code: "loopback", fix: "Connect the built-in VPN in ailove Setup.")
+        let title = AppModel.problemText(code: "loopback", fix: "Connect the built-in VPN in myai Setup.")
         var problem = PokiState(phase: .problem, headline: title, thumbnailVersion: 0)
         problem.label = "Runner Stopped"
         problem.stepCount = 6
@@ -457,7 +457,7 @@ enum DemoActivity {
     static func alert() async {
         guard let (activity, state) = current else { return }
         await activity.update(.init(state: state, staleDate: nil, relevanceScore: 100),
-                              alertConfiguration: AlertConfiguration(title: "ailove", body: "\(state.headline)", sound: .default))
+                              alertConfiguration: AlertConfiguration(title: "myai", body: "\(state.headline)", sound: .default))
         AppLog.shared.add("activity", "demo alert sent")
     }
 }

@@ -677,7 +677,7 @@ final class AppModel: ObservableObject {
         let rec = Record(udid: facts.udid, phoneName: facts.name, ios: facts.ios, appleId: "jane.appleseed@icloud.com", teamId: "A1B2C3D4E5", teamName: "Jane Appleseed (Personal Team)", teamIsFree: true, bundleId: "nz.zheha.poki.A1B2C3D4E5", appGroup: "group.nz.zheha.poki.A1B2C3D4E5", version: "0.2.8", build: "64", releaseTag: "local:Poki-0.2.8-external-unsigned.ipa", signedAt: now - 2 * 86_400, profileExpiresAt: now + 5 * 86_400, lastCheckedAt: now - 3600, lastError: nil, wifiAddress: "192.168.1.23", pairingHandedOff: false)
         phones = [PhoneRow(phone: PhoneRef(udid: facts.udid), facts: facts, error: nil, record: rec)]
         records = [rec]
-        relay = Deployed(accountId: "abc", accountName: "Jane's account", address: "https://poki-relay.jane.workers.dev", firstDeploy: false, deployedAt: now - 86_400, phoneLink: "poki://setup?relay=https://poki-relay.jane.workers.dev")
+        relay = Deployed(accountId: "abc", accountName: "Jane's account", address: "https://poki-relay.jane.workers.dev", firstDeploy: false, deployedAt: now - 86_400, phoneLink: "myai://setup?relay=https://poki-relay.jane.workers.dev")
         latest = Release(tag: "ios-v0.2.8", version: "0.2.8", build: "64", ipaName: "Poki-external-0.2.8-64.ipa", channel: "beta")
         channels = [
             ChannelInfo(id: "stable", title: "Stable", selected: true, latest: nil),

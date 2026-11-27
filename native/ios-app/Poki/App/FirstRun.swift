@@ -204,7 +204,7 @@ struct FirstRunGuide: View {
                     .padding(.vertical, 8)
                     .accessibilityIdentifier("firstRun.finishLater")
             }
-            Text("Set up ailove")
+            Text("Set up myai")
                 .font(.largeTitle.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("firstRun.checklist")
@@ -285,9 +285,9 @@ struct FirstRunGuide: View {
         } else {
             switch row {
             case .vpn:
-                Text(complete ? "ailove is connected using its built-in VPN." : "The built-in VPN connects automatically. Tap Allow if iOS asks to add a VPN configuration.")
+                Text(complete ? "myai is connected using its built-in VPN." : "The built-in VPN connects automatically. Tap Allow if iOS asks to add a VPN configuration.")
             case .pairing:
-                Text(complete ? "This iPhone is paired with ailove." : "Connect the built-in VPN to start pairing this iPhone.")
+                Text(complete ? "This iPhone is paired with myai." : "Connect the built-in VPN to start pairing this iPhone.")
             case .voice:
                 if complete {
                     Text("Your voice account is ready.")
@@ -303,7 +303,7 @@ struct FirstRunGuide: View {
                     Text("Pair this iPhone before connecting a voice account.")
                 }
             case .controls:
-                Text(complete ? "ailove can operate apps on this iPhone." : "ailove checks the system settings for phone control after you connect a voice account.")
+                Text(complete ? "myai can operate apps on this iPhone." : "myai checks the system settings for phone control after you connect a voice account.")
             case .microphone:
                 if complete {
                     Text("The microphone is ready. Start voice control to give your first command.")

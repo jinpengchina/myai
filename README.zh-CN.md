@@ -1,6 +1,6 @@
-# ailove
+# myai
 
-ailove 是基于 [Poki](https://github.com/JosssphZhou/poki) 的 iPhone 助手开发者预览版。它使用内置 VPN 连接本机，首次设置采用黑底白字的英文单页清单，支持在任务执行时继续用语音补充指令。
+myai 是基于 [Poki](https://github.com/JosssphZhou/poki) 的 iPhone 助手开发者预览版。它使用内置 VPN 连接本机，首次设置采用黑底白字的英文单页清单，支持在任务执行时继续用语音补充指令。
 
 [英文文档和自签安装指南](README.md#build-for-your-iphone) · [隐私说明](PRIVACY.md) · [许可证](LICENSE)
 

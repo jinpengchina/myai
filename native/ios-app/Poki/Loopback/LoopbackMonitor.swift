@@ -349,7 +349,7 @@ final class LoopbackMonitor {
         case .noAnswer where proxyAnswers: Self.proxyHint
         case .noAnswer where cellularOnly: Self.cellularHint
         case .noAnswer: AppLocalization.text(LocalizedStringResource("The local interface is present, but this iPhone does not answer at 10.7.0.1. Reconnect the local connection and check Wi-Fi. If it still does not answer, pair again in Setup › Pairing, then check Developer Mode."))
-        case .off: AppLocalization.text(LocalizedStringResource("Connect the built-in VPN in ailove Setup."))
+        case .off: AppLocalization.text(LocalizedStringResource("Connect the built-in VPN in myai Setup."))
         }
     }
 }

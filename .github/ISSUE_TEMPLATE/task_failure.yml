@@ -1,5 +1,5 @@
 name: Task failure
-description: Poki ran but could not complete a real task in a specific app (blocked screen, wrong target, would not stop).
+description: myai ran but could not complete a real task in a specific app (blocked screen, wrong target, would not stop).
 labels: ["type:task-failure"]
 body:
   - type: markdown
@@ -17,7 +17,7 @@ body:
     id: where
     attributes:
       label: Point of failure
-      description: The screen where Poki got stuck, and what it did or reported there.
+      description: The screen where myai got stuck, and what it did or reported there.
     validations:
       required: true
   - type: dropdown
@@ -28,14 +28,14 @@ body:
         - Poki Agent (terminal)
         - Poki Agent over iMessage or Telegram
         - Another MCP client (Claude Code, Codex, ...)
-        - Poki iPhone app
+        - myai iPhone app
     validations:
       required: true
   - type: input
     id: versions
     attributes:
-      label: Poki version and model
-      description: The Poki version and commit (or app build), along with the model used.
+      label: myai version and model
+      description: The myai version and commit (or app build), along with the model used.
       placeholder: 0.1.1 f4fd51e, gpt-6.1
     validations:
       required: true

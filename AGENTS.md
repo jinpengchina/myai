@@ -1,6 +1,6 @@
-# ailove repository guide
+# myai repository guide
 
-ailove is an iPhone developer preview based on Poki. Use the local build and signing instructions in [README.md](README.md). Generate the Xcode project using `native/ios-app/scripts/generate-ailove-project.sh` and keep credentials and personal signing values in local files.
+myai is an iPhone developer preview based on Poki. Use the local build and signing instructions in [README.md](README.md). Generate the Xcode project using `native/ios-app/scripts/generate-myai-project.sh` and keep credentials and personal signing values in local files.
 
 - Use black backgrounds, white text and English interface copy for new designs.
 - Preserve existing users' setup, pairing and account records during updates. Test fresh setup with a separately signed installation.

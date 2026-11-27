@@ -89,17 +89,17 @@ The plan bubble's motion (`PlanMotion.swift`) uses the spring, duration and orde
 
 ## Replaced upstream interface components
 
-The ailove source snapshot replaces the affected Poki conversation rows, conversation drawer,
+The myai source snapshot replaces the affected Poki conversation rows, conversation drawer,
 chat toolbar, voice header, and composer layout with native SwiftUI implementations. The
 historical Poki notices credited earlier layouts to GetStream samples and the OpenBot and
-DrawerSideBar projects. The released source snapshot uses the ailove implementations for these
+DrawerSideBar projects. The released source snapshot uses the myai implementations for these
 surfaces. The MIT-licensed Exyte attachment control attribution above remains applicable.
 
 ## iPhone app capsule field
 
-The message field's app capsules ([native/ios-app/Poki/Capsule](native/ios-app/Poki/Capsule), ESP-377) adapt three files from [element-hq/element-x-ios](https://github.com/element-hq/element-x-ios/tree/21758530da454c65969c6ef159b9ca47b9394a7a) at commit `2175853`, copyright 2025 Element Creations Ltd. and 2023-2025 New Vector Ltd., under the GNU Affero General Public License v3.0 only, the license Poki itself uses: `ElementX/Sources/Other/Pills/PillTextAttachment.swift`, `PillTextAttachmentData.swift` and `PillView.swift`. Poki removed their room context and WysiwygComposer dependency, made the pill an app's icon and name, and draws it into the attachment's image. Each file names its source in its header. ailove omits the upstream app icon collection and uses an installed or runtime-resolved icon where available.
+The message field's app capsules ([native/ios-app/Poki/Capsule](native/ios-app/Poki/Capsule), ESP-377) adapt three files from [element-hq/element-x-ios](https://github.com/element-hq/element-x-ios/tree/21758530da454c65969c6ef159b9ca47b9394a7a) at commit `2175853`, copyright 2025 Element Creations Ltd. and 2023-2025 New Vector Ltd., under the GNU Affero General Public License v3.0 only, the license Poki itself uses: `ElementX/Sources/Other/Pills/PillTextAttachment.swift`, `PillTextAttachmentData.swift` and `PillView.swift`. Poki removed their room context and WysiwygComposer dependency, made the pill an app's icon and name, and draws it into the attachment's image. Each file names its source in its header. myai omits the upstream app icon collection and uses an installed or runtime-resolved icon where available.
 
-The upstream GitHub shortcut used the GitHub Octicons mark (`@primer/octicons` 19.15.0), copyright 2025 GitHub Inc. ailove omits the image and retains the [MIT notice](third_party/LICENSE.octicons).
+The upstream GitHub shortcut used the GitHub Octicons mark (`@primer/octicons` 19.15.0), copyright 2025 GitHub Inc. myai omits the image and retains the [MIT notice](third_party/LICENSE.octicons).
 
 ## iPhone app settings rows
 

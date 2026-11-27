@@ -67,8 +67,8 @@ final class TaskAppsTests: XCTestCase {
                        "com.apple.mobileslideshow", "none named: the most actions")
     }
 
-    func testPokiAndTheHomeScreenAreNoApp() {
-        let apps = task(launching: [Bundle.main.bundleIdentifier ?? "Poki"], steps: ["Poki", "Home screen (SpringBoard: the home screen)", "unknown", nil])
+    func testCurrentAndPreviousAppNamesAndTheHomeScreenAreNoApp() {
+        let apps = task(launching: [Bundle.main.bundleIdentifier ?? "Poki"], steps: ["myai", "ailove", "Poki", "Home screen (SpringBoard: the home screen)", "unknown", nil])
         XCTAssertNil(apps.target(request: "打开微信"), "nothing it worked in: no icon rather than the app it names")
     }
 

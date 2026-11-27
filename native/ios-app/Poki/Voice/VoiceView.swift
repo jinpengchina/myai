@@ -41,7 +41,7 @@ struct VoiceView: View {
                 } footer: {
                     if micDenied { Text("Poki can't use the microphone. Allow it in Settings, Privacy, Microphone.").foregroundStyle(.orange) }
                     else if voice.canTalkLive {
-                        Text("Tap the waveform in chat to start continuous voice. You can add instructions while ailove works in another app. See progress in the Live Activity and tap End to close the microphone.")
+                        Text("Tap the waveform in chat to start continuous voice. You can add instructions while myai works in another app. See progress in the Live Activity and tap End to close the microphone.")
                     } else {
                         Text("A live conversation uses OpenAI’s Realtime voice, which needs an OpenAI API key in Settings › Models. Dictation in the message field works with every model.")
                     }

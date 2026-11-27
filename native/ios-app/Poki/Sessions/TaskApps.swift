@@ -22,7 +22,7 @@ struct TaskApps: Equatable {
         // PokiCore names the home screen, the App Switcher and system alerts "Home screen (…)".
         if app.hasPrefix("Home screen") || app == "unknown" || app == "com.apple.springboard" { return nil }
         let key = AppIconStore.bundleID(app) ?? app
-        if key == Bundle.main.bundleIdentifier || key.caseInsensitiveCompare(AppBrand.name) == .orderedSame || key.caseInsensitiveCompare("Poki") == .orderedSame { return nil }
+        if key == Bundle.main.bundleIdentifier || AppBrand.matchesDisplayName(key) { return nil }
         return key
     }
 

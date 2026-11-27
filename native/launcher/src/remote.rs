@@ -86,11 +86,11 @@ impl fmt::Display for RemoteError {
         match self.stage {
             Stage::Connect => write!(
                 f,
-                "remote pairing connect failed: cannot reach the phone's remote pairing service ({detail}). Check the built-in VPN in ailove Setup."
+                "remote pairing connect failed: cannot reach the phone's remote pairing service ({detail}). Check the built-in VPN in myai Setup."
             ),
             Stage::NotListening => write!(
                 f,
-                "remote pairing connect failed: the loopback reached the phone, and nothing there listens on this port ({detail}). iOS moves its remote pairing service to another port when it starts the service again; Poki looks the port up in Bonjour and tries again by itself."
+                "remote pairing connect failed: the loopback reached the phone, and nothing there listens on this port ({detail}). iOS moves its remote pairing service to another port when it starts the service again; myai looks the port up in Bonjour and tries again by itself."
             ),
             Stage::Handshake | Stage::HandshakeDropped => write!(
                 f,
@@ -98,7 +98,7 @@ impl fmt::Display for RemoteError {
             ),
             Stage::PairVerify => write!(
                 f,
-                "pair-verify failed: the phone does not accept this RPPairing file ({detail}). Pair again in Poki's setup."
+                "pair-verify failed: the phone does not accept this RPPairing file ({detail}). Pair again in myai's setup."
             ),
             Stage::Listener => write!(
                 f,
@@ -145,7 +145,7 @@ pub fn read_pairing_file(
         .map_err(|error| format!("Cannot read RPPairing file {}: {error}", path.display()))?;
     let file = RpPairingFile::from_bytes(&bytes).map_err(|error| {
         format!(
-            "{} is not a valid RPPairing file ({error}). It needs public_key, private_key and identifier; pair again in Poki's setup.",
+            "{} is not a valid RPPairing file ({error}). It needs public_key, private_key and identifier; pair again in myai's setup.",
             path.display()
         )
     })?;

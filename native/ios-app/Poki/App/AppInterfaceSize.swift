@@ -220,7 +220,7 @@ private struct InterfaceSizePreview: View {
                               send: { _, _ in }, stop: {}, openVoice: {})
                 .allowsHitTesting(false)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text("Message Poki"))
+                .accessibilityLabel(Text("Message myai"))
                 .padding(.horizontal, 18).padding(.top, 6).padding(.bottom, 10)
                 .frame(maxWidth: 720)
         }

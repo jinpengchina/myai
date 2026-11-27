@@ -10,7 +10,7 @@ import install_fresh_test as fresh
 
 
 REPO = Path(__file__).resolve().parents[3]
-BUNDLE_ID = "com.example.ailove"
+BUNDLE_ID = "com.example.myai"
 LEGACY = BUNDLE_ID + ".firstuse"
 
 
@@ -26,7 +26,7 @@ class FreshInstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, mock.patch.object(fresh, "select_phone") as select:
             repo = Path(tmp) / "repo"
             store = Path(tmp) / "state"
-            with self.assertRaisesRegex(ValueError, "AILOVE_BUNDLE_ID"):
+            with self.assertRaisesRegex(ValueError, "MYAI_BUNDLE_ID"):
                 fresh.run_install(repo, store)
             with self.assertRaisesRegex(ValueError, "DEVELOPMENT_TEAM"):
                 fresh.run_install(repo, store, bundle_id_arg=BUNDLE_ID)
@@ -38,13 +38,27 @@ class FreshInstallTests(unittest.TestCase):
             config = repo / "native/ios-app" / fresh.LOCAL_SIGNING_CONFIG
             config.parent.mkdir(parents=True)
             config.write_text(f"// local settings\nDEVELOPMENT_TEAM = TESTTEAM01\n"
-                              f"AILOVE_BUNDLE_ID = {BUNDLE_ID} // user-owned bundle ID\n")
+                              f"MYAI_BUNDLE_ID = {BUNDLE_ID} // user-owned bundle ID\n")
             self.assertEqual(fresh.read_local_signing_config(repo),
-                             {"DEVELOPMENT_TEAM": "TESTTEAM01", "AILOVE_BUNDLE_ID": BUNDLE_ID})
-        foreign = fresh.new_identity("com.other.ailove", 7)
+                             {"DEVELOPMENT_TEAM": "TESTTEAM01", "MYAI_BUNDLE_ID": BUNDLE_ID})
+        foreign = fresh.new_identity("com.other.myai", 7)
         with self.assertRaises(ValueError):
             fresh.validate_identity(foreign, BUNDLE_ID)
         self.assertEqual(fresh.next_number([{"bundleIdentifier": foreign["bundle_id"]}], 0, BUNDLE_ID), 1)
+
+    def test_previous_signing_config_is_supported_then_current_config_takes_priority(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            directory = repo / "native/ios-app"
+            directory.mkdir(parents=True)
+            legacy = directory / fresh.LEGACY_SIGNING_CONFIG
+            legacy.write_text("DEVELOPMENT_TEAM = TESTTEAM01\nAILOVE_BUNDLE_ID = com.example.previous\n")
+            self.assertEqual(fresh.read_local_signing_config(repo),
+                             {"DEVELOPMENT_TEAM": "TESTTEAM01", "MYAI_BUNDLE_ID": "com.example.previous"})
+            current = directory / fresh.LOCAL_SIGNING_CONFIG
+            current.write_text(f"MYAI_BUNDLE_ID = {BUNDLE_ID}\n")
+            self.assertEqual(fresh.read_local_signing_config(repo),
+                             {"DEVELOPMENT_TEAM": "TESTTEAM01", "MYAI_BUNDLE_ID": BUNDLE_ID})
 
     def test_delivery_acknowledged_by_phone_is_not_repeated(self):
         identity = fresh.new_identity(BUNDLE_ID, 3)
@@ -59,7 +73,10 @@ class FreshInstallTests(unittest.TestCase):
             send.assert_not_called()
 
     def test_previously_numbered_chinese_copy_resumes_under_its_original_name(self):
-        original = {**fresh.new_identity(BUNDLE_ID, 12), "name": "ailove 测试12"}
+        current = fresh.new_identity(BUNDLE_ID, 12)
+        original = {**current, "name": "ailove 测试12",
+                    "scheme": current["scheme"].replace("myai-test-", "ailove-test-")}
+        fresh.validate_identity({**original, "name": "ailove Test 12"}, BUNDLE_ID)
         for invalid in ({"name": "ailove 测试02"}, {"group": "group." + BUNDLE_ID}):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 fresh.validate_identity({**original, **invalid}, BUNDLE_ID)
@@ -153,16 +170,17 @@ class FreshInstallTests(unittest.TestCase):
             work = Path(tmp)
             staged = fresh.stage_sources(REPO, work, identity, BUNDLE_ID)
             project = (staged / "project-base.yml").read_text()
-            self.assertEqual(identity["name"], "ailove Test 02")
-            self.assertIn('static let name = "ailove Test 02"', (staged / "Shared/AppLocalization.swift").read_text())
-            config = (staged / "ailove.xcconfig").read_text()
-            self.assertIn("AILOVE_BUNDLE_ID = " + identity["bundle_id"], config)
-            self.assertIn("POKI_BUNDLE_ID: $(AILOVE_BUNDLE_ID)", project)
+            self.assertEqual(identity["name"], "myai Test 02")
+            self.assertIn('static let name = "myai Test 02"', (staged / "Shared/AppLocalization.swift").read_text())
+            config = (staged / "myai.xcconfig").read_text()
+            self.assertIn("MYAI_BUNDLE_ID = " + identity["bundle_id"], config)
+            self.assertIn("POKI_BUNDLE_ID: $(MYAI_BUNDLE_ID)", project)
             self.assertIn("POKI_APP_GROUP: group.$(POKI_BUNDLE_ID)", project)
             groups = [line.split(":", 1)[1].strip() for line in project.splitlines()
                       if "com.apple.security.application-groups:" in line]
             self.assertEqual(groups, ['["$(POKI_APP_GROUP)"]'] * 2)
             self.assertFalse((staged / fresh.LOCAL_SIGNING_CONFIG).exists())
+            self.assertFalse((staged / fresh.LEGACY_SIGNING_CONFIG).exists())
             self.assertEqual((staged / "Package.resolved").read_bytes(),
                              (REPO / "native/ios-app/Package.resolved").read_bytes())
             self.assertIn("[" + identity["scheme"] + "]", project)
@@ -170,9 +188,11 @@ class FreshInstallTests(unittest.TestCase):
             translations = names["strings"]["CFBundleDisplayName"]["localizations"]
             for language in ("en", "zh-Hans", "zh-Hant"):
                 self.assertEqual(translations[language]["stringUnit"]["value"], identity["name"])
+            app = (staged / "Poki/App/PokiApp.swift").read_text()
+            self.assertIn(f'url.scheme == "{identity["scheme"]}" || url.scheme == "ailove"', app)
             activity = (staged / "Shared/ActivityFace.swift").read_text()
             self.assertIn(identity["scheme"] + "://setup", activity)
-            self.assertNotIn("ailove://", activity)
+            self.assertNotIn("myai://", activity)
 
 
 if __name__ == "__main__":

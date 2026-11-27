@@ -7,8 +7,8 @@ import { createHash } from 'node:crypto';
 import { ensureSetupApp } from '../src/install/setup-app.mjs';
 import { run } from '../src/install/run.mjs';
 
-process.env.AILOVE_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
-process.env.AILOVE_LEGACY_SETUP_TEAM_IDS = 'TESTTEAM01';
+process.env.MYAI_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
+process.env.MYAI_LEGACY_SETUP_TEAM_IDS = 'TESTTEAM01';
 
 const asset = name => ({ name, browser_download_url: `https://github.com/assets/${name}`, url: `https://api.github.com/assets/${name}` });
 const hash = text => createHash('sha256').update(text).digest('hex');

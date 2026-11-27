@@ -21,7 +21,7 @@ const CRYPTEXD: &str = "com.apple.security.cryptexd.remote";
 const IMAGE_MOUNTER: &str = "com.apple.mobile.mobile_image_mounter.shim.remote";
 /// What only a cryptex has; the app removes them when it downloads the personalized image.
 const CRYPTEX_ONLY_FILES: [&str; 2] = ["Image.dmg.cryptex_info", "Image.dmg.root_hash"];
-const DDI_WRONG_KIND_FIX: &str = "The developer disk image in Poki is for another iOS version. Open Poki and let it download the image again.";
+const DDI_WRONG_KIND_FIX: &str = "The developer disk image in myai is for another iOS version. Open myai and let it download the image again.";
 
 /// How this iOS takes the developer disk image.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -66,7 +66,7 @@ pub async fn mount(device: &mut Device, dir: &str) -> Result<()> {
 }
 
 fn not_downloaded() -> Failure {
-    Failure::new("the developer disk image has not been downloaded").fix("Open Poki and let it download the developer disk image (about 20 MB), once.")
+    Failure::new("the developer disk image has not been downloaded").fix("Open myai and let it download the developer disk image (about 20 MB), once.")
 }
 
 async fn mount_cryptex(device: &mut Device, dir: &str) -> Result<()> {
@@ -76,7 +76,7 @@ async fn mount_cryptex(device: &mut Device, dir: &str) -> Result<()> {
     if !files_present(dir) {
         return Err(not_downloaded());
     }
-    let assets = Cryptex1Assets::load(dir).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {e}")).fix("Open Poki and download the developer disk image again."))?;
+    let assets = Cryptex1Assets::load(dir).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {e}")).fix("Open myai and download the developer disk image again."))?;
     install_ddi(&mut device.adapter, &mut device.rsd, &assets).await.map_err(|e| classify(&e))?;
     Ok(())
 }
@@ -91,7 +91,7 @@ async fn mount_personalized(device: &mut Device, dir: &str, ios: &str) -> Result
         return Err(not_downloaded());
     }
     let read = |name: &'static str| async move {
-        tokio::fs::read(Path::new(dir).join(name)).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {name}: {e}")).fix("Open Poki and download the developer disk image again.").code("ddi_bad"))
+        tokio::fs::read(Path::new(dir).join(name)).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {name}: {e}")).fix("Open myai and download the developer disk image again.").code("ddi_bad"))
     };
     let manifest = read("BuildManifest.plist").await?;
     let image = read("Image.dmg").await?;
@@ -168,10 +168,10 @@ pub fn classify(error: &IdeviceError) -> Failure {
             "mounting the developer disk image failed: {error} ({:?})",
             io.kind()
         ))
-        .fix("Check the local developer connection in Poki Setup → Loopback. Poki retries automatically.")
+        .fix("Check the local developer connection in myai Setup → Loopback. myai retries automatically.")
         .code("ddi_socket"),
         _ => failure
-            .fix("Check the developer disk image status in Poki Setup → Pairing. Poki retries automatically.")
+            .fix("Check the developer disk image status in myai Setup → Pairing. myai retries automatically.")
             .code("ddi_mount"),
     }
 }

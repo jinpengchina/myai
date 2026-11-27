@@ -1,12 +1,12 @@
 name: Bug report
-description: Something in Poki does not work as documented (iPhone app, Poki Setup, Poki MCP, or Poki Agent).
+description: Something in myai or its supporting tools does not work as documented.
 labels: ["type:bug"]
 body:
   - type: markdown
     attributes:
       value: |
         Search existing issues in this repository first. To report a vulnerability, use the private report option in this repository's Security tab.
-        If installing Poki failed, use the **Install failure** form. If the tools work but a task in an app fails, use **Task failure**.
+        If installing myai failed, use the **Install failure** form. If the tools work but a task in an app fails, use **Task failure**.
   - type: textarea
     id: problem
     attributes:
@@ -24,21 +24,21 @@ body:
   - type: dropdown
     id: area
     attributes:
-      label: Affected area in Poki
+      label: Affected area in myai
       options:
-        - Poki iPhone app
+        - myai iPhone app
         - Poki MCP
         - Poki Agent, iMessage, or Telegram
-        - Installation or Poki Setup
+        - Installation or signing
         - Other or not sure
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Poki version
+      label: myai version
       description: The app version from Settings (with build and channel), or the version and commit from `poki_mcp_status`.
-      placeholder: Poki 0.2.8 (501) Alpha, or 0.1.1 f4fd51e
+      placeholder: myai version, build number, or source commit
     validations:
       required: true
   - type: input

@@ -34,10 +34,10 @@ final class InterfaceSizeLocalizationTests: XCTestCase {
         try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
 
         let cases = [
-            ("en", "Help me plan tomorrow.", "Reminder created", "ailove’s Browser"),
+            ("en", "Help me plan tomorrow.", "Reminder created", "myai’s Browser"),
             ("zh-Hans", "帮我安排一下明天的计划。", "已创建提醒", "浏览器"),
             ("zh-Hant", "幫我安排一下明天的計劃。", "已建立提醒", "瀏覽器"),
-            ("system", "Help me plan tomorrow.", "Reminder created", "ailove’s Browser"),
+            ("system", "Help me plan tomorrow.", "Reminder created", "myai’s Browser"),
         ]
         for preview in [true, false] {
             let controller = UIHostingController(rootView:

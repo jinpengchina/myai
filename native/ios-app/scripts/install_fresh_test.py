@@ -13,9 +13,10 @@ import subprocess
 import sys
 import uuid
 
-SIMULATOR_BUNDLE_ID = "org.ailove.development"
-LOCAL_SIGNING_CONFIG = "ailove.local.xcconfig"
-XCODE_SCHEME = "AiloveFreshTest"
+SIMULATOR_BUNDLE_IDS = {"org.myai.development", "org.ailove.development"}
+LOCAL_SIGNING_CONFIG = "myai.local.xcconfig"
+LEGACY_SIGNING_CONFIG = "ailove.local.xcconfig"
+XCODE_SCHEME = "myai"
 TARGET = "aarch64-apple-ios"
 
 
@@ -39,26 +40,29 @@ def production_bundle_id(bundle_id):
 
 def validate_production_bundle_id(bundle_id):
     require(bundle_id and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*(?:\.[A-Za-z0-9][A-Za-z0-9-]*)+", bundle_id)
-            and bundle_id != SIMULATOR_BUNDLE_ID and production_bundle_id(bundle_id) is None,
-            "Set AILOVE_BUNDLE_ID to your own reverse-DNS app identifier in ailove.local.xcconfig, or use --bundle-id.")
+            and bundle_id not in SIMULATOR_BUNDLE_IDS and production_bundle_id(bundle_id) is None,
+            "Set MYAI_BUNDLE_ID to your own reverse-DNS app identifier in myai.local.xcconfig, or use --bundle-id.")
 
 
 def read_local_signing_config(repo):
-    path = repo / "native/ios-app" / LOCAL_SIGNING_CONFIG
-    if not path.exists():
-        return {}
     config = {}
-    for line in path.read_text().splitlines():
-        match = re.fullmatch(r"\s*(DEVELOPMENT_TEAM|AILOVE_BUNDLE_ID)\s*=\s*(\S+)", line.partition("//")[0].strip())
-        if match:
-            config[match[1]] = match[2]
+    for filename in (LEGACY_SIGNING_CONFIG, LOCAL_SIGNING_CONFIG):
+        path = repo / "native/ios-app" / filename
+        if not path.exists():
+            continue
+        for line in path.read_text().splitlines():
+            match = re.fullmatch(r"\s*(DEVELOPMENT_TEAM|MYAI_BUNDLE_ID|AILOVE_BUNDLE_ID)\s*=\s*(\S+)",
+                                 line.partition("//")[0].strip())
+            if match:
+                key = "MYAI_BUNDLE_ID" if match[1] == "AILOVE_BUNDLE_ID" else match[1]
+                config[key] = match[2]
     return config
 
 
 def make_identity(bundle_id, number, suffix):
     bundle = f"{bundle_id}.qa.t{number:02d}-{suffix}"
     return {"number": number, "bundle_id": bundle, "group": "group." + bundle,
-            "name": f"ailove Test {number:02d}", "scheme": "ailove-test-" + suffix}
+            "name": f"myai Test {number:02d}", "scheme": "myai-test-" + suffix}
 
 
 def new_identity(bundle_id, number):
@@ -78,8 +82,9 @@ def validate_identity(identity, bundle_id):
     require(type(number) is int and number >= 1 and match,
             "The reserved test app does not belong to the configured bundle identifier.")
     current = make_identity(bundle_id, number, match[2])
-    previous = {**current, "name": f"ailove 测试{number:02d}"}
-    require(identity in (current, previous),
+    previous = {**current, "name": f"ailove Test {number:02d}", "scheme": "ailove-test-" + match[2]}
+    previous_chinese = {**previous, "name": f"ailove 测试{number:02d}"}
+    require(identity in (current, previous, previous_chinese),
             "The saved test app identity is incomplete. Check state.json.")
 
 
@@ -157,8 +162,8 @@ def brand_catalog(path, name, scheme):
 
     def brand(text):
         # Keep identifiers and the replacement URL scheme intact. Chinese can adjoin the name.
-        return re.sub(r"(?<![a-zA-Z0-9_.])ailove(?![a-zA-Z0-9_:/-]|\.[a-zA-Z])", name,
-                      text.replace("ailove://", scheme + "://"))
+        return re.sub(r"(?<![a-zA-Z0-9_.])myai(?![a-zA-Z0-9_:/-]|\.[a-zA-Z])", name,
+                      text.replace("myai://", scheme + "://"))
 
     def translate(node):
         if isinstance(node, dict):
@@ -173,7 +178,7 @@ def brand_catalog(path, name, scheme):
         if brand(key) != key and "en" not in entry.get("localizations", {}):
             entry.setdefault("localizations", {})["en"] = {
                 "stringUnit": {"state": "translated", "value": brand(key)}}
-        entries[key.replace("ailove://", scheme + "://")] = entry
+        entries[key.replace("myai://", scheme + "://")] = entry
     catalog["strings"] = entries
     path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2))
 
@@ -186,7 +191,7 @@ def stage_sources(repo, work, identity, bundle_id):
     require(not destination.is_relative_to(source_native) and not source_native.is_relative_to(destination),
             "The test work directory must be separate from the checkout.")
     work.mkdir(parents=True, exist_ok=True)
-    marker = work / ".ailove-fresh-work"
+    marker = work / ".myai-fresh-work"
     require(not (work / "native").exists() or marker.is_file(), "The work directory contains sources that this installer did not create.")
     marker.touch()
     original = repo / "native/ios-app"
@@ -195,7 +200,7 @@ def stage_sources(repo, work, identity, bundle_id):
         shutil.rmtree(native)
     src = native / "ios-app"
     shutil.copytree(original, src, ignore=shutil.ignore_patterns("*.xcodeproj", "xcuserdata", ".DS_Store",
-                                                                LOCAL_SIGNING_CONFIG))
+                                                                LOCAL_SIGNING_CONFIG, LEGACY_SIGNING_CONFIG))
     for component in ("ios", "ios-gym", "codex-voice"):
         (native / component).symlink_to(repo / "native" / component, target_is_directory=True)
     (native / "launcher").mkdir()
@@ -207,24 +212,23 @@ def stage_sources(repo, work, identity, bundle_id):
 
     bundle, name, scheme = (identity[key] for key in ("bundle_id", "name", "scheme"))
     base = src / "project-base.yml"
-    replace(src / "ailove.xcconfig", f"AILOVE_BUNDLE_ID = {SIMULATOR_BUNDLE_ID}", f"AILOVE_BUNDLE_ID = {bundle}")
-    replace(base, "POKI_DISPLAY_NAME: ailove", "POKI_DISPLAY_NAME: " + name)
-    replace(base, "CFBundleURLSchemes: [ailove]", f"CFBundleURLSchemes: [{scheme}]")
-    replace(base, "schemes:\n  Poki:", f"schemes:\n  {XCODE_SCHEME}:")
-    replace(src / "project.yml", "CFBundleDisplayName: ailove VPN", f"CFBundleDisplayName: {name} VPN")
+    replace(src / "myai.xcconfig", "MYAI_BUNDLE_ID = $(AILOVE_BUNDLE_ID)", f"MYAI_BUNDLE_ID = {bundle}")
+    replace(base, "POKI_DISPLAY_NAME: myai", "POKI_DISPLAY_NAME: " + name)
+    replace(base, "CFBundleURLSchemes: [myai]", f"CFBundleURLSchemes: [{scheme}]")
+    replace(src / "project.yml", "CFBundleDisplayName: myai VPN", f"CFBundleDisplayName: {name} VPN")
     require("pairer.start(hostName: AppBrand.name" in (src / "Poki/App/AppModel.swift").read_text(),
             "The pairing host name no longer matches the configured app name.")
-    replace(src / "Shared/AppLocalization.swift", 'static let name = "ailove"', f'static let name = "{name}"')
-    replace(src / "Poki/App/PokiApp.swift", 'url.scheme == "ailove"', f'url.scheme == "{scheme}"')
-    replace(src / "Poki/Setup/PairingScanner.swift", '["ailove", "poki"]', f'["{scheme}", "ailove", "poki"]')
-    replace(src / "Poki/LaunchScreen.storyboard", 'text="ailove"', f'text="{name}"')
+    replace(src / "Shared/AppLocalization.swift", 'static let name = "myai"', f'static let name = "{name}"')
+    replace(src / "Poki/App/PokiApp.swift", 'url.scheme == "myai"', f'url.scheme == "{scheme}"')
+    replace(src / "Poki/Setup/PairingScanner.swift", '["myai", "ailove", "poki"]', f'["{scheme}", "myai", "ailove", "poki"]')
+    replace(src / "Poki/LaunchScreen.storyboard", 'text="myai"', f'text="{name}"')
     # Keep Swift and the Rust voice backend on their shared protocol service names.
     # Each new app has its own signed Keychain access group; verify_package enforces it.
     for component in ("Poki", "PokiWidgets", "Shared", "PokiTunnel"):
         for path in (src / component).rglob("*.swift"):
             original_text = path.read_text()
-            if "ailove://" in original_text:
-                path.write_text(original_text.replace("ailove://", scheme + "://"))
+            if "myai://" in original_text:
+                path.write_text(original_text.replace("myai://", scheme + "://"))
         for path in (src / component).rglob("*.xcstrings"):
             brand_catalog(path, name, scheme)
     return src
@@ -253,8 +257,8 @@ def build_app(repo, store, identity, team, bundle_id):
         run(["cargo", "build", "--release", "--locked", "--target", TARGET, "--target-dir", str(target_cache),
              "--manifest-path", str(repo / "native/launcher/Cargo.toml"), "--jobs", "3"])
         run([str(src / "scripts/make-assets.sh")])
-        run([str(src / "scripts/generate-ailove-project.sh")])
-        project = src / "ailove.xcodeproj"
+        run([str(src / "scripts/generate-myai-project.sh")])
+        project = src / "myai.xcodeproj"
         run(["xcodebuild", "-project", str(project), "-scheme", XCODE_SCHEME, "-configuration", "Release",
              "-destination", "generic/platform=iOS", "-derivedDataPath", str(store / "DerivedData"),
              "-clonedSourcePackagesDirPath", str(packages), "-onlyUsePackageVersionsFromResolvedFile",
@@ -311,7 +315,7 @@ def verify_package(app, identity, team, udid, version, build):
         directory = app / (language + ".lproj")
         info = plistlib.loads((directory / "InfoPlist.strings").read_bytes())
         messages = plistlib.loads((directory / "Localizable.strings").read_bytes())
-        instruction = "In Settings, open Privacy & Security › Developer Mode and choose Pair with ailove."
+        instruction = "In Settings, open Privacy & Security › Developer Mode and choose Pair with myai."
         require(info.get("CFBundleDisplayName") == name and name in messages.get(instruction, ""),
                 f"The Home Screen name or pairing host name is incorrect for {language}.")
     subprocess.run(["codesign", "--verify", "--deep", "--strict", str(app)], check=True)
@@ -353,7 +357,7 @@ def write_state(path, state):
 def product_directory(repo):
     # iCloud Drive can add Finder metadata to signed bundles even after a clean copy.
     checkout = hashlib.sha256(os.fsencode(repo.resolve())).hexdigest()[:16]
-    return Path.home() / "Library/Caches/ailove-first-use" / checkout
+    return Path.home() / "Library/Caches/myai-first-use" / checkout
 
 
 def run_install(repo, store, device_arg=None, team_arg=None, products=None, bundle_id_arg=None):
@@ -370,11 +374,11 @@ def run_install(repo, store, device_arg=None, team_arg=None, products=None, bund
         pending = state["pending"]
         settings = read_local_signing_config(repo)
         pending_bundle = production_bundle_id(pending["identity"]["bundle_id"]) if pending else None
-        bundle_id = bundle_id_arg or pending_bundle or settings.get("AILOVE_BUNDLE_ID")
+        bundle_id = bundle_id_arg or pending_bundle or settings.get("MYAI_BUNDLE_ID")
         validate_production_bundle_id(bundle_id)
         team = team_arg or (pending and pending["team"]) or settings.get("DEVELOPMENT_TEAM")
         require(team and re.fullmatch(r"[A-Z0-9]{10}", team),
-                "Set DEVELOPMENT_TEAM to your 10-character Apple Team ID in ailove.local.xcconfig, or use --team.")
+                "Set DEVELOPMENT_TEAM to your 10-character Apple Team ID in myai.local.xcconfig, or use --team.")
         if pending:
             validate_identity(pending["identity"], bundle_id)
         logs = store / "device"
@@ -414,10 +418,13 @@ def run_install(repo, store, device_arg=None, team_arg=None, products=None, bund
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Install an isolated ailove test build over Wi-Fi. Rerun to resume an interrupted installation.")
-    parser.add_argument("--device", default=os.environ.get("AILOVE_TEST_DEVICE"), help="Paired Wi-Fi iPhone name or UDID")
-    parser.add_argument("--team", default=os.environ.get("AILOVE_TEST_TEAM"), help="Apple Development team (defaults to ailove.local.xcconfig)")
-    parser.add_argument("--bundle-id", default=os.environ.get("AILOVE_TEST_BUNDLE_ID"), help="Your ailove app's bundle ID (defaults to ailove.local.xcconfig)")
+    parser = argparse.ArgumentParser(description="Install an isolated myai test build over Wi-Fi. Rerun to resume an interrupted installation.")
+    parser.add_argument("--device", default=os.environ.get("MYAI_TEST_DEVICE") or os.environ.get("AILOVE_TEST_DEVICE"),
+                        help="Paired Wi-Fi iPhone name or UDID")
+    parser.add_argument("--team", default=os.environ.get("MYAI_TEST_TEAM") or os.environ.get("AILOVE_TEST_TEAM"),
+                        help="Apple Development team (defaults to myai.local.xcconfig)")
+    parser.add_argument("--bundle-id", default=os.environ.get("MYAI_TEST_BUNDLE_ID") or os.environ.get("AILOVE_TEST_BUNDLE_ID"),
+                        help="Your myai app's bundle ID (defaults to myai.local.xcconfig)")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[3]
     store = repo / "build/fresh-tests"

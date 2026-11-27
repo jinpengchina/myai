@@ -47,7 +47,7 @@ final class RustPairing: NSObject, DevicePairing, NetServiceDelegate {
     private var service: NetService?
     private var attempt: UUID?
     private var publicationEvent: (@Sendable (PairingEvent) -> Void)?
-    static let publicationFailure = "Pairing could not appear in Settings. In Settings › Privacy & Security › Local Network, allow ailove, then try again on Wi-Fi."
+    static let publicationFailure = "Pairing could not appear in Settings. In Settings › Privacy & Security › Local Network, allow myai, then try again on Wi-Fi."
 
     func start(hostName: String, saveTo: URL, onEvent: @escaping @Sendable (PairingEvent) -> Void) throws {
         cancel()

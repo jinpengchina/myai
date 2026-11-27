@@ -63,7 +63,9 @@ struct GhAsset {
 
 /// Optional GitHub source for legacy release clients. A source preview has no default publisher.
 pub fn repo() -> String {
-    let repo = std::env::var("AILOVE_LEGACY_RELEASE_REPO").unwrap_or_default();
+    let repo = std::env::var("MYAI_LEGACY_RELEASE_REPO")
+        .or_else(|_| std::env::var("AILOVE_LEGACY_RELEASE_REPO"))
+        .unwrap_or_default();
     let repo = repo.trim();
     if let Some((owner, name)) = repo.split_once('/') {
         if !owner.is_empty() && owner.bytes().all(|c| c.is_ascii_alphanumeric() || b"_-".contains(&c))
@@ -79,7 +81,7 @@ pub fn repo() -> String {
 pub(crate) fn require_repo() -> Result<String> {
     let repo = repo();
     if repo.is_empty() {
-        return Err(Error::msg("No release repository is configured. Build and install ailove with Xcode using the README."));
+        return Err(Error::msg("No release repository is configured. Build and install myai with Xcode using the README."));
     }
     Ok(repo)
 }

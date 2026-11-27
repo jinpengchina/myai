@@ -16,6 +16,14 @@ SPEC.loader.exec_module(MOD)
 
 
 class MeasureStepLatencyIsolationTests(unittest.TestCase):
+    def test_browser_instructions_end_reply_examples_for_each_supported_brand(self):
+        for brand in ("myai", "Poki", "ailove"):
+            with self.subTest(brand=brand):
+                instructions = f"{brand} has its own browser for websites, apart from Safari."
+                sections = MOD.split_system_prompt(f"## Reply examples\n\nSample response.\n\n{instructions}")
+                self.assertEqual(sections["reply_examples"], "## Reply examples\n\nSample response.")
+                self.assertEqual(sections["embedded_tool_instructions"], instructions)
+
     def test_cli_rejects_external_udid_flag(self):
         proc = subprocess.run(
             [

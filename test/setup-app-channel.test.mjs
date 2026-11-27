@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { channelOf, latestSetup } from '../src/install/setup-app.mjs';
 
-process.env.AILOVE_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
+process.env.MYAI_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
 
 test('app-* tags map to channels', () => {
   assert.equal(channelOf('app-0.2.9-prealpha.640', true), 'pre-alpha');

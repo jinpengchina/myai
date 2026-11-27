@@ -29,9 +29,9 @@ test('every Affected area option either maps to an area label or is the unlabele
 
 test('an issue body is matched to its form and its area label', () => {
   const forms = loadForms(dir);
-  const body = '### Goal or use case\n\nOpen Maps\n\n### Current limitation\n\nNot supported\n\n### Affected area in Poki\n\nPoki Agent, iMessage, or Telegram\n\n### Impact\n\n_No response_\n';
+  const body = '### Goal or use case\n\nOpen Maps\n\n### Current limitation\n\nNot supported\n\n### Affected area in myai\n\nPoki Agent, iMessage, or Telegram\n\n### Impact\n\n_No response_\n';
   assert.equal(matchForm(body, forms)?.file, 'feature_request.yml');
   assert.equal(areaLabel(body), 'area:agent');
   assert.equal(matchForm('### Problem description\n\nbroken', forms), null);
-  assert.equal(areaLabel('### Affected area in Poki\n\nOther or not sure\n'), null);
+  assert.equal(areaLabel('### Affected area in myai\n\nOther or not sure\n'), null);
 });

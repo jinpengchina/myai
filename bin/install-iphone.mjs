@@ -108,7 +108,7 @@ if (opts['update-only'] && !opts.help &&
 }
 const dryRun = opts['dry-run'];
 if (!opts.help && !dryRun && (command === 'run' || opts['update-only']) && !releaseRepository()) {
-  const reason = 'Install ailove from source with Xcode using the README. The legacy installer needs an explicitly configured release repository.';
+  const reason = 'Install myai from source with Xcode using the README. The legacy installer needs an explicitly configured release repository.';
   if (opts['update-only']) updateResult(false, 'setup_download_failed', reason);
   else if (opts.json) console.log(JSON.stringify({ event: 'error', code: 'setup_download_failed', reason, retrying: false, at: new Date().toISOString() }));
   else console.error(reason);

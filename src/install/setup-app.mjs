@@ -1,6 +1,6 @@
 // Finds or installs Poki Setup for Mac: the newest PokiSetup-<version>-<build>-macos.dmg on the
 // channel (same channel rule as desktop/core/src/release.rs), checked against SHA256SUMS-desktop.txt,
-// Poki's Developer ID team and Apple's notarization before anything in it runs.
+// the configured Developer ID teams and Apple's notarization before anything in it runs.
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createReadStream, existsSync } from 'node:fs';
@@ -8,12 +8,12 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { releaseRepository } from '../release-repository.mjs';
+import { legacyReleaseSetting, releaseRepository } from '../release-repository.mjs';
 import { releaseCatalog, downloadCatalogAsset, ReleaseUnavailable } from './release-catalog.mjs';
 
 const exec = promisify(execFile);
 function trustedTeams() {
-  return (process.env.AILOVE_LEGACY_SETUP_TEAM_IDS ?? '').split(',').map(value => value.trim())
+  return (legacyReleaseSetting('SETUP_TEAM_IDS') ?? '').split(',').map(value => value.trim())
     .filter(value => /^[A-Z0-9]{10}$/.test(value));
 }
 const ORDER = ['stable', 'beta', 'alpha', 'pre-alpha'];
@@ -52,7 +52,7 @@ export function channelOf(tag, prerelease) {
 
 async function github(path) {
   const repo = releaseRepository();
-  if (!repo) throw new SetupError('setup_download_failed', 'No installer release repository is configured. Build and install ailove with Xcode using the README.');
+  if (!repo) throw new SetupError('setup_download_failed', 'No installer release repository is configured. Build and install myai with Xcode using the README.');
   const response = await request(`https://api.github.com/repos/${repo}${path}`, 'application/vnd.github+json');
   return response.json();
 }
@@ -184,7 +184,7 @@ export async function downloadSetup(release, downloads, onNote = () => {}) {
   return dmg;
 }
 
-// The team in `codesign -dv` output when it is one of Poki's, else null. The whole line has to match:
+// The team in `codesign -dv` output when it is explicitly trusted, else null. The whole line has to match:
 // a team whose identifier merely starts with ours is another team.
 export function pokiTeamOf(codesignText) {
   const team = /^TeamIdentifier=(.*)$/m.exec(codesignText)?.[1].trim();
@@ -197,7 +197,7 @@ export async function verifyApp(app) {
     await exec('codesign', ['--verify', '--deep', '--strict', app]);
     const { stderr } = await exec('codesign', ['-dv', '--verbose=2', app]);
     const team = pokiTeamOf(stderr);
-    if (!team) throw new Error('not signed by team listed in AILOVE_LEGACY_SETUP_TEAM_IDS');
+    if (!team) throw new Error('not signed by team listed in MYAI_LEGACY_SETUP_TEAM_IDS');
     const assessed = await exec('spctl', ['-a', '-t', 'exec', '-vv', app]).catch(error => error);
     const text = `${assessed.stdout ?? ''}${assessed.stderr ?? ''}`;
     if (!/accepted/.test(text) || !/Notarized Developer ID/.test(text)) throw new Error(`Gatekeeper: ${text.trim()}`);
@@ -233,7 +233,7 @@ export function findSetupBridge({ recorded, into, roots = setupAppRoots(into) } 
 // when it is at least as new as the channel's; otherwise the release is installed into `into`.
 export async function ensureSetupApp({ channel, into = join(homedir(), 'Applications'), downloads, onNote = () => {} }) {
   if (!trustedTeams().length) {
-    throw new SetupError('setup_signature_invalid', 'No installer signing team is configured. Build and install ailove with Xcode using the README.');
+    throw new SetupError('setup_signature_invalid', 'No installer signing team is configured. Build and install myai with Xcode using the README.');
   }
   const release = await latestSetup(channel, onNote);
   for (const app of ['/Applications/Poki Setup.app', join(homedir(), 'Applications/Poki Setup.app'), join(into, 'Poki Setup.app')]) {

@@ -13,7 +13,7 @@ const exec = promisify(execFile);
 const cli = join(root, 'bin/install-iphone.mjs');
 const fakeBridge = join(root, 'src/install/fake-bridge.mjs');
 // The terminal path, unless a test turns the Poki Setup windows on with a fake osascript.
-const fastEnv = { AILOVE_LEGACY_RELEASE_REPO: 'fixture-owner/fixture-repo', POKI_INSTALL_WAIT_MS: '20000', POKI_INSTALL_POLL_MS: '20', POKI_INSTALL_RETRY_MS: '20', POKI_FAKE_DELAY_MS: '30', POKI_INSTALL_DIALOGS: '0' };
+const fastEnv = { MYAI_LEGACY_RELEASE_REPO: 'fixture-owner/fixture-repo', POKI_INSTALL_WAIT_MS: '20000', POKI_INSTALL_POLL_MS: '20', POKI_INSTALL_RETRY_MS: '20', POKI_FAKE_DELAY_MS: '30', POKI_INSTALL_DIALOGS: '0' };
 
 async function stateDir(t) {
   const dir = await mkdtemp(join(tmpdir(), 'poki-install-test-'));

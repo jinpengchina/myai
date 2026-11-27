@@ -156,7 +156,7 @@ enum SetupStep: String, CaseIterable, Identifiable {
         switch self {
         case .runner: "The helper app that taps and types for your agent. Poki starts it; you never open it."
         case .developerMode: Self.inProcess ? "Lets Poki use this iPhone’s developer services." : "Lets this iPhone run Poki Runner."
-        case .loopback: "Connect to this iPhone with the built-in ailove VPN."
+        case .loopback: "Connect to this iPhone with the built-in myai VPN."
         case .pairing: Self.onDevicePairing ? "Gives Poki its own key to this iPhone. Made and kept on the phone, no computer needed." : "Gives Poki its own key to this iPhone. On this iOS version the key is made on a computer with Poki Setup, then sent here."
         case .automation: Self.inProcess ? "Lets Poki use other apps." : "Lets Poki Runner use other apps."
         case .background: "Keeps Poki connected while it is in the background, and shows what it does on the Lock Screen."
@@ -168,7 +168,7 @@ enum SetupStep: String, CaseIterable, Identifiable {
         switch self {
         case .runner: "Install Poki Runner, then trust it: Settings > General > VPN & Device Management."
         case .developerMode: "Settings > Privacy & Security > Developer Mode. Turn it on, restart, then tap Turn On."
-        case .loopback: "Connect the built-in VPN in ailove Setup."
+        case .loopback: "Connect the built-in VPN in myai Setup."
         case .pairing: Self.onDevicePairing ? "Settings > Privacy & Security > Developer Mode > Pair with Poki, then type the code shown here." : "Pair from Poki Setup on your computer, then send the pairing file to this iPhone."
         case .automation: "Settings > Developer > Enable UI Automation."
         case .background: "Allow location While Using the App, and keep Live Activities on."

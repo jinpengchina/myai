@@ -203,7 +203,7 @@ struct MemorySourceValue: View {
             Text(item.source.label).font(.subheadline).foregroundStyle(Color(.label))
             if let heard = item.heard {
                 Button {
-                    if let session = heard.session, let url = URL(string: "ailove://session/\(session)") { openURL(url) }
+                    if let session = heard.session, let url = URL(string: "myai://session/\(session)") { openURL(url) }
                 } label: {
                     HStack(spacing: 4) {
                         Text("\(heard.app.map(MemoryFormat.appName) ?? AppBrand.name), \(MemoryFormat.moment(heard.at))")

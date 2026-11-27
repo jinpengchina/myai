@@ -26,7 +26,7 @@ pub struct Deployed {
     pub address: String,
     pub first_deploy: bool,
     pub deployed_at: i64,
-    /// `poki://setup?relay=<address>`, for the QR the phone scans.
+    /// `myai://setup?relay=<address>`, for the QR the phone scans.
     pub phone_link: String,
     /// SHA-256 of the Worker code deployed, to tell when a newer relay is out.
     #[serde(default)]
@@ -258,10 +258,18 @@ pub fn token_or_saved(given: Option<String>) -> Result<String> {
     given.filter(|t| !t.trim().is_empty()).or_else(saved_token).ok_or_else(|| Error::msg("Paste a Cloudflare API token first."))
 }
 
-pub fn phone_link(address: &str) -> String { format!("poki://setup?relay={}", urlencode(address)) }
+pub fn phone_link(address: &str) -> String { format!("myai://setup?relay={}", urlencode(address)) }
 
 fn path() -> Result<std::path::PathBuf> { Ok(crate::paths::state_dir()?.join("relay.json")) }
-pub fn remembered() -> Result<Option<Deployed>> { Ok(std::fs::read_to_string(path()?).ok().and_then(|t| serde_json::from_str(&t).ok())) }
+pub fn remembered() -> Result<Option<Deployed>> {
+    let deployed = std::fs::read_to_string(path()?).ok()
+        .and_then(|text| serde_json::from_str::<Deployed>(&text).ok())
+        .map(|mut deployed| {
+            deployed.phone_link = phone_link(&deployed.address);
+            deployed
+        });
+    Ok(deployed)
+}
 pub fn remember(d: &Deployed) -> Result<()> {
     std::fs::write(path()?, serde_json::to_vec_pretty(d)?)?;
     Ok(())
@@ -273,7 +281,7 @@ mod tests {
     fn worker_is_bundled() {
         assert!(super::WORKER_JS.contains("DeviceRelay"));
         assert!(super::WORKER_JS.len() > 10_000);
-        assert_eq!(super::phone_link("https://poki-relay.me.workers.dev"), "poki://setup?relay=https%3A%2F%2Fpoki-relay.me.workers.dev");
+        assert_eq!(super::phone_link("https://poki-relay.me.workers.dev"), "myai://setup?relay=https%3A%2F%2Fpoki-relay.me.workers.dev");
     }
 }
 

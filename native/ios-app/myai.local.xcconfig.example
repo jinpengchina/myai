@@ -1,0 +1,3 @@
+// Copy to myai.local.xcconfig and set your own Apple Development values.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+MYAI_BUNDLE_ID = com.example.myai

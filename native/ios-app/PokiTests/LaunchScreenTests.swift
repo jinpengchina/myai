@@ -11,7 +11,7 @@ final class LaunchScreenTests: XCTestCase {
         let mark = try XCTUnwrap(view.viewWithTag(1) as? UIImageView)
         let name = try XCTUnwrap(view.viewWithTag(2) as? UILabel)
         XCTAssertNotNil(mark.image)
-        XCTAssertEqual(name.text, "ailove")
+        XCTAssertEqual(name.text, "myai")
         for size in [CGSize(width: 320, height: 568), CGSize(width: 1024, height: 768)] {
             view.frame = CGRect(origin: .zero, size: size)
             view.layoutIfNeeded()

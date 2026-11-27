@@ -14,7 +14,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Poki version or app build, computer OS, iPhone model, iOS, and connection.
+      description: myai version or app build, computer OS, iPhone model, iOS, and connection.
     validations:
       required: true
   - type: textarea

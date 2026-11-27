@@ -88,7 +88,7 @@ final class TaskCardSkillTests: XCTestCase {
         XCTAssertEqual(bothZh.labels(for: "taskCard.memoryUse"), ["用到了：\(noteText)"])
         XCTAssertFalse(bothZhXML.contains("用到了：点常点的那家"), "Skill must not leak into Chinese memory row:\n\(bothZhXML)")
         XCTAssertTrue(bothZhXML.contains("技能：点常点的那家"), "Expanded running card still shows skill detail")
-        XCTAssertTrue(bothZhXML.contains("ailove 报告使用的记忆：\(noteText)"), "Expanded running card still shows memory detail")
+        XCTAssertTrue(bothZhXML.contains("myai 报告使用的记忆：\(noteText)"), "Expanded running card still shows memory detail")
     }
 
     func testRainbowPaletteSelectionAndExactStops() {

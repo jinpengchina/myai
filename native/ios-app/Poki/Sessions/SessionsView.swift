@@ -278,14 +278,14 @@ struct SessionsView: View {
                 id: "sample-1",
                 kind: .handoff,
                 client: "Claude Code",
-                title: "Claude → Poki",
+                title: "Claude → myai",
                 started: now,
                 updated: now,
                 live: true,
                 outcome: nil,
                 entries: [ChatEntry(.poki(AppLocalization.text(LocalizedStringResource("Needs your OK: send “On my way” to Mom")))), ChatEntry(.note(.waiting))],
                 calls: [],
-                customName: "Claude → Poki"
+                customName: "Claude → myai"
             ),
             SavedSession(
                 id: "sample-2",

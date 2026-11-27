@@ -27,3 +27,4 @@ PokiTunnel/PokiTunnel.entitlements
 
 # Local signing settings
 /ailove.local.xcconfig
+/myai.local.xcconfig

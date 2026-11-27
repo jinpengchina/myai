@@ -592,7 +592,7 @@ final class LiveActivityTests: XCTestCase {
                 let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
                 let reopen = try XCTUnwrap(pending.first { $0.identifier == updateID },
                                            "Update reopen notification must remain scheduled while a Dynamic Island activity runs")
-                XCTAssertEqual(reopen.content.title, "ailove Was Updated")
+                XCTAssertEqual(reopen.content.title, "myai Was Updated")
                 hold.closeAll()
                 await installing.value
             }
@@ -622,7 +622,7 @@ final class LiveActivityTests: XCTestCase {
             app.chatTaskEnded(reply: "Sent the note.", session: "finish-notch", acted: true)
 
             let banner = try await waitForDeliveredNotice("poki-reply")
-            XCTAssertEqual(banner.request.content.body, "The task has ended. Open ailove to see the result.")
+            XCTAssertEqual(banner.request.content.body, "The task has ended. Open myai to see the result.")
         }
     }
 
@@ -646,7 +646,7 @@ final class LiveActivityTests: XCTestCase {
                 app.chatTaskEnded(reply: "Sent the note.", session: "finish-no-activity", acted: true)
 
                 let banner = try await waitForDeliveredNotice("poki-reply")
-                XCTAssertEqual(banner.request.content.body, "The task has ended. Open ailove to see the result.")
+                XCTAssertEqual(banner.request.content.body, "The task has ended. Open myai to see the result.")
             }
         }
     }

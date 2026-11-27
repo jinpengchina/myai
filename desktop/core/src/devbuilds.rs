@@ -224,7 +224,8 @@ pub async fn use_cli() -> Result<State> {
 
 fn client_id() -> Result<String> {
     release::require_repo()?;
-    std::env::var("AILOVE_LEGACY_GITHUB_CLIENT_ID")
+    std::env::var("MYAI_LEGACY_GITHUB_CLIENT_ID")
+        .or_else(|_| std::env::var("AILOVE_LEGACY_GITHUB_CLIENT_ID"))
         .ok()
         .filter(|v| !v.is_empty() && v.bytes().all(|c| c.is_ascii_alphanumeric()))
         .ok_or_else(|| Error::msg("This build has no GitHub device sign-in configured."))

@@ -766,7 +766,7 @@ final class SelfSigner {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        content.userInfo = ["poki_link": "ailove://setup"]
+        content.userInfo = ["poki_link": "myai://setup"]
         let trigger = seconds.map { UNTimeIntervalNotificationTrigger(timeInterval: $0, repeats: false) }
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }

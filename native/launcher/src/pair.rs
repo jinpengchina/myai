@@ -71,7 +71,7 @@ pub async fn run(config: PairConfig, emit: impl Fn(Value) + Send + Sync + 'stati
         Ok(Ok(())) => return,
         Ok(Err(detail)) => detail,
         Err(_) if !code_requested.load(Ordering::Relaxed) => "Settings did not request a pairing code within 10 minutes. Try again.".into(),
-        Err(_) => "Pairing was not finished in Settings within 10 minutes, so Poki stopped waiting. Tap Try again to pair.".into(),
+        Err(_) => "Pairing was not finished in Settings within 10 minutes, so myai stopped waiting. Tap Try again to pair.".into(),
     };
     emit(json!({"event": "failed", "detail": detail}));
 }

@@ -266,7 +266,7 @@ final class AppModelTests: XCTestCase {
     /// A pairing refusal is kept until the phone accepts again; a disk-image refusal re-downloads.
     func testPairingRefusalThenAcceptance() {
         let (model, _) = model()
-        model.runnerChanged(RunnerStatus(state: "failed", detail: "the phone refused the pairing", fix: "Pair again in Poki's setup.", code: "pairing"))
+        model.runnerChanged(RunnerStatus(state: "failed", detail: "the phone refused the pairing", fix: "Pair again in myai's setup.", code: "pairing"))
         XCTAssertNotNil(model.pairingTrouble)
         model.runnerChanged(RunnerStatus(state: "launching"))
         XCTAssertNil(model.pairingTrouble)
@@ -438,7 +438,7 @@ final class ApprovalDefaultTests: XCTestCase {
         XCTAssertEqual(model.approvalMode, .off)
         XCTAssertEqual(AppModel(launcher: FakeLauncher(), pairer: FakePairing()).approvalMode, .off, "after a restart")
         let said = chat.entries.compactMap { entry -> String? in if case .poki(let text) = entry.kind { text } else { nil } }
-        XCTAssertTrue(said.contains { $0.contains("Approvals are off") && $0.contains("ailove://approvals") }, "\(said)")
+        XCTAssertTrue(said.contains { $0.contains("Approvals are off") && $0.contains("myai://approvals") }, "\(said)")
 
         model.approvalMode = .confirm
         model.stopAsking(PendingApproval(id: "card", app: "Messages", summary: "Tap Send", reason: "sending a message (\"send\")", expires: Date().addingTimeInterval(60)))
@@ -1055,7 +1055,7 @@ final class InProcessPasscodeTests: XCTestCase {
         await handOverToTheMountedImage()
         session.answer(["ok": false, "code": "missing_framework"])
         await waitFor("the local session failure") { self.model.localSessionTrouble != nil }
-        try await assertLoopbackPageShowsSessionTrouble(expected: "ailove could not open its own automation session (missing_framework)")
+        try await assertLoopbackPageShowsSessionTrouble(expected: "myai could not open its own automation session (missing_framework)")
 
         session.holdNextOpen()
         model.runnerChanged(RunnerStatus(state: "running", code: "local_ddi"))
@@ -1359,10 +1359,10 @@ final class InProcessPasscodeTests: XCTestCase {
         await waitFor("step finished and model is thinking between steps") { self.model.activityText == "Idle" }
 
         let workingFace = PokiState(phase: .working, headline: "Looking", thumbnailVersion: 0).face
-        XCTAssertEqual(workingFace.link, URL(string: "ailove://activity"))
+        XCTAssertEqual(workingFace.link, URL(string: "myai://activity"))
 
         stateLock.withLock { front = (pokiBundle, "Poki") }
-        let activityLink = try XCTUnwrap(URL(string: "ailove://activity"))
+        let activityLink = try XCTUnwrap(URL(string: "myai://activity"))
         XCTAssertEqual(model.open(link: activityLink), .ignored)
         model.becameActive()
 
@@ -1439,7 +1439,7 @@ final class InProcessPasscodeTests: XCTestCase {
         // On real iOS, scenePhase == .active fires while SpringBoard's activeAppInfo still reports
         // the previous app or SpringBoard during the Dynamic Island zoom animation.
         stateLock.withLock { front = ("com.apple.springboard", "SpringBoard") }
-        let activityLink = try XCTUnwrap(URL(string: "ailove://activity"))
+        let activityLink = try XCTUnwrap(URL(string: "myai://activity"))
         XCTAssertEqual(model.open(link: activityLink), .ignored)
         model.becameActive()
         let firstReturn = try XCTUnwrap(model.liveActivityReturnTask)
@@ -1527,7 +1527,7 @@ final class InProcessPasscodeTests: XCTestCase {
         XCTAssertFalse(springBoardRead.isError, springBoardRead.text)
         await waitFor("SpringBoard read finished") { self.model.activityText == "Idle" }
 
-        let activityLink = try XCTUnwrap(URL(string: "ailove://activity"))
+        let activityLink = try XCTUnwrap(URL(string: "myai://activity"))
         XCTAssertEqual(model.open(link: activityLink), .ignored)
         model.becameActive()
         let springBoardReturn = try XCTUnwrap(model.liveActivityReturnTask)
@@ -1628,7 +1628,7 @@ final class InProcessPasscodeTests: XCTestCase {
         await waitFor("slow /source read is holding the gate") {
             stateLock.withLock { enteredHold && releaseHold != nil }
         }
-        let activityLink = try XCTUnwrap(URL(string: "ailove://activity"))
+        let activityLink = try XCTUnwrap(URL(string: "myai://activity"))
         XCTAssertEqual(model.open(link: activityLink), .ignored)
         model.becameActive()
         let slowReturnTask = try XCTUnwrap(model.liveActivityReturnTask)
@@ -2230,7 +2230,7 @@ final class FrontendSubtractionTests: XCTestCase {
         let hint = SetupIssueHint.homeLine(model: ending)
         XCTAssertEqual(hint?.target, .updates)
         let warning = ExpiryWarning(expiry: ending.signer.expiry)?.message ?? "no warning"
-        XCTAssertEqual(hint?.message, "ailove’s signing ends soon\n" + warning)
+        XCTAssertEqual(hint?.message, "myai’s signing ends soon\n" + warning)
         XCTAssertEqual(SetupIssueHint.home(model: ending), hint, "the drawer's reminder")
 
         UserDefaults.standard.set(3.0, forKey: "pokiSigningDays")
@@ -2292,17 +2292,19 @@ final class FrontendSubtractionTests: XCTestCase {
         XCTAssertEqual(runnerIssue?.fix, .setup)
     }
 
-    /// Any web page, message or app can open a `ailove://` link. One that names a relay only asks: the
+    /// Any web page, message or app can open a `myai://` link. One that names a relay only asks: the
     /// relay could see the screen and act on the phone, so nothing changes until the owner allows it.
     func testARelayLinkAsksAndDoesNotSetTheRelay() throws {
         let model = AppModel(launcher: FakeLauncher(), pairer: FakePairing())
         let before = model.relayAddress
-        XCTAssertEqual(model.open(link: try XCTUnwrap(URL(string: "poki://setup?relay=https%3A%2F%2Fevil.example"))), .continueRouting)
-        XCTAssertEqual(model.relayAddress, before, "not set by the link alone")
-        XCTAssertEqual(model.linkAsk?.host, "https://evil.example")
-        model.answerLink(false, to: try XCTUnwrap(model.linkAsk).id)
-        XCTAssertNil(model.linkAsk)
-        XCTAssertEqual(model.relayAddress, before, "declined")
+        for scheme in ["myai", "ailove", "poki"] {
+            XCTAssertEqual(model.open(link: try XCTUnwrap(URL(string: "\(scheme)://setup?relay=https%3A%2F%2Fevil.example"))), .continueRouting)
+            XCTAssertEqual(model.relayAddress, before, "not set by the link alone")
+            XCTAssertEqual(model.linkAsk?.host, "https://evil.example")
+            model.answerLink(false, to: try XCTUnwrap(model.linkAsk).id)
+            XCTAssertNil(model.linkAsk)
+            XCTAssertEqual(model.relayAddress, before, "declined")
+        }
     }
 
     /// #350 review: a second link while the first one's alert is on screen. Allow and Don't Allow apply

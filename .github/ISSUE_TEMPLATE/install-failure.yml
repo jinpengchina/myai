@@ -1,11 +1,11 @@
 name: Install failure
-description: Installing Poki on the iPhone stopped at a step and did not get past it.
+description: Building, signing, or installing myai on the iPhone stopped at a step.
 labels: ["type:bug", "area:install"]
 body:
   - type: markdown
     attributes:
       value: |
-        If an agent installed Poki for you, `node bin/install-iphone.mjs issue` fills this in. Read it before you submit.
+        Include the exact failure from Xcode or the test installer. If you ran the legacy Poki installer, its `issue` command can generate a draft.
         `node bin/install-iphone.mjs diagnose` removes passcodes, passwords, tokens, API keys, your device's name and its UDID for you. To report a vulnerability, use the private report option in this repository's Security tab.
   - type: textarea
     id: problem
@@ -25,8 +25,8 @@ body:
         - Find the iPhone
         - Pair (Trust This Computer)
         - Developer Mode
-        - Sign and install Poki
-        - Trust the developer and open Poki
+        - Sign and install the app
+        - Trust the developer and open the app
         - Relay
         - Self-check
         - Don't know
@@ -38,8 +38,9 @@ body:
       label: Installation method
       options:
         - Agent installer (node bin/install-iphone.mjs)
-        - Poki Setup for Mac (window)
-        - Poki Setup for Windows (window)
+        - Xcode on macOS
+        - Legacy Poki Setup for Mac (window)
+        - Legacy Poki Setup for Windows (window)
         - poki-setup command line
     validations:
       required: true
@@ -54,9 +55,9 @@ body:
   - type: input
     id: versions
     attributes:
-      label: Poki and Poki Setup versions
+      label: App and installer versions
       description: Include the host OS version, plus the Xcode version if installed.
-      placeholder: Poki Setup 0.2.1 (319) on Windows 11, Poki 0.4.4
+      placeholder: myai version and build, Xcode version, and macOS version
     validations:
       required: true
   - type: input

@@ -1,5 +1,5 @@
 name: Feature request
-description: Ask for a task or capability Poki does not handle yet, or propose a design change.
+description: Ask for a task or capability myai does not handle yet, or propose a design change.
 labels: ["type:feature"]
 body:
   - type: markdown
@@ -16,18 +16,18 @@ body:
     id: limitation
     attributes:
       label: Current limitation
-      description: How Poki handles the task now, or where it stops. Include measurements for performance issues.
+      description: How myai handles the task now, or where it stops. Include measurements for performance issues.
     validations:
       required: true
   - type: dropdown
     id: area
     attributes:
-      label: Affected area in Poki
+      label: Affected area in myai
       options:
-        - Poki iPhone app
+        - myai iPhone app
         - Poki MCP
         - Poki Agent, iMessage, or Telegram
-        - Installation or Poki Setup
+        - Installation or signing
         - Other or not sure
     validations:
       required: true

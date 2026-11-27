@@ -8,19 +8,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "ailove"
+            "value" : "myai"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove"
+            "value" : "myai"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove"
+            "value" : "myai"
           }
         }
       }
@@ -32,19 +32,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove uses the camera to take photos you send in a message, and to scan the pairing code from Poki Setup on your computer."
+            "value" : "myai uses the camera to take photos you send in a message, and to scan the pairing code from Poki Setup on your computer."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 使用相机拍摄你在消息里发送的照片，以及扫描电脑上 Poki Setup 显示的配对码。"
+            "value" : "myai 使用相机拍摄你在消息里发送的照片，以及扫描电脑上 Poki Setup 显示的配对码。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 使用相機拍攝你在訊息裡傳送的照片，以及掃描電腦上 Poki Setup 顯示的配對碼。"
+            "value" : "myai 使用相機拍攝你在訊息裡傳送的照片，以及掃描電腦上 Poki Setup 顯示的配對碼。"
           }
         }
       }
@@ -56,19 +56,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove uses Face ID to unlock Screen History, so only you can open it."
+            "value" : "myai uses Face ID to unlock Screen History, so only you can open it."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 使用面容 ID 解锁屏幕记录，确保只有你能打开。"
+            "value" : "myai 使用面容 ID 解锁屏幕记录，确保只有你能打开。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 使用 Face ID 解鎖螢幕記錄，確保只有你能打開。"
+            "value" : "myai 使用 Face ID 解鎖螢幕記錄，確保只有你能打開。"
           }
         }
       }
@@ -80,19 +80,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove connects to developer services on this iPhone for pairing and automation, and to the voice bridge on your Mac."
+            "value" : "myai connects to developer services on this iPhone for pairing and automation, and to the voice bridge on your Mac."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 会连接此 iPhone 的开发者服务以完成配对和自动化，并连接 Mac 上的语音桥接。"
+            "value" : "myai 会连接此 iPhone 的开发者服务以完成配对和自动化，并连接 Mac 上的语音桥接。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 會連線此 iPhone 的開發者服務以完成配對與自動化，並連線 Mac 上的語音橋接。"
+            "value" : "myai 會連線此 iPhone 的開發者服務以完成配對與自動化，並連線 Mac 上的語音橋接。"
           }
         }
       }
@@ -104,19 +104,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove stays active in the background while on so agents can reach this iPhone. ailove never records or sends your location."
+            "value" : "myai stays active in the background while on so agents can reach this iPhone. myai never records or sends your location."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 开启时会在后台保持运行，以便智能体连接此 iPhone。ailove 不会记录或发送你的位置。"
+            "value" : "myai 开启时会在后台保持运行，以便智能体连接此 iPhone。myai 不会记录或发送你的位置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 開啟時會在背景保持執行，以便智慧體連線此 iPhone。ailove 不會記錄或傳送你的位置。"
+            "value" : "myai 開啟時會在背景保持執行，以便智慧體連線此 iPhone。myai 不會記錄或傳送你的位置。"
           }
         }
       }
@@ -128,19 +128,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove stays active in the background while on so agents can reach this iPhone. ailove never records or sends your location."
+            "value" : "myai stays active in the background while on so agents can reach this iPhone. myai never records or sends your location."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 开启时会在后台保持运行，以便智能体连接此 iPhone。ailove 不会记录或发送你的位置。"
+            "value" : "myai 开启时会在后台保持运行，以便智能体连接此 iPhone。myai 不会记录或发送你的位置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 開啟時會在背景保持執行，以便智慧體連線此 iPhone。ailove 不會記錄或傳送你的位置。"
+            "value" : "myai 開啟時會在背景保持執行，以便智慧體連線此 iPhone。myai 不會記錄或傳送你的位置。"
           }
         }
       }
@@ -152,19 +152,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove listens to app audio you choose to share so it can answer questions about it."
+            "value" : "myai listens to app audio you choose to share so it can answer questions about it."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 会听你选择共享的 App 声音，用来回答相关问题。"
+            "value" : "myai 会听你选择共享的 App 声音，用来回答相关问题。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 會聽你選擇共享的 App 聲音，用來回答相關問題。"
+            "value" : "myai 會聽你選擇共享的 App 聲音，用來回答相關問題。"
           }
         }
       }
@@ -176,19 +176,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "When you start live voice, ailove sends microphone audio to your voice service so you can give instructions while using other apps. Tap End to close the microphone."
+            "value" : "When you start live voice, myai sends microphone audio to your voice service so you can give instructions while using other apps. Tap End to close the microphone."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启实时语音后，ailove 会将麦克风声音发送给你配置的语音服务。使用其他 App 时也可以继续发指令，点「结束」即可关闭麦克风。"
+            "value" : "开启实时语音后，myai 会将麦克风声音发送给你配置的语音服务。使用其他 App 时也可以继续发指令，点「结束」即可关闭麦克风。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟即時語音後，ailove 會將麥克風聲音傳送給你設定的語音服務。使用其他 App 時也可以繼續下指令，點選「結束」即可關閉麥克風。"
+            "value" : "開啟即時語音後，myai 會將麥克風聲音傳送給你設定的語音服務。使用其他 App 時也可以繼續下指令，點選「結束」即可關閉麥克風。"
           }
         }
       }

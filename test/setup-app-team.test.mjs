@@ -21,7 +21,7 @@ const mac = process.platform === 'darwin';
 
 const signing = team => `Identifier=nz.zheha.poki.setup\nAuthority=Developer ID Application: Someone\nTeamIdentifier=${team}\nTimestamp=Nov 15, 2026\n`;
 
-process.env.AILOVE_LEGACY_SETUP_TEAM_IDS = 'ANVS3UQK9W, Q64ZL36CJN';
+process.env.MYAI_LEGACY_SETUP_TEAM_IDS = 'ANVS3UQK9W, Q64ZL36CJN';
 
 test('explicitly selected Developer ID teams can be trusted', () => {
   assert.equal(installer.pokiTeamOf(signing('ANVS3UQK9W')), 'ANVS3UQK9W');

@@ -1,13 +1,13 @@
 # Shared app and widget configuration for the local-VPN and external-connection builds.
 name: Poki
 options:
-  bundleIdPrefix: org.ailove.development
+  bundleIdPrefix: org.myai.development
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
 configFiles:
-  Debug: ailove.xcconfig
-  Release: ailove.xcconfig
+  Debug: myai.xcconfig
+  Release: myai.xcconfig
 packages:
   PokiCore:
     path: ../ios/PokiCore
@@ -22,9 +22,9 @@ packages:
     revision: 13f157d78ec2eb1ed95d5623518ec92f8aaf7ef0 # v1.6.0
 settings:
   base:
-    POKI_BUNDLE_ID: $(AILOVE_BUNDLE_ID)
+    POKI_BUNDLE_ID: $(MYAI_BUNDLE_ID)
     POKI_APP_GROUP: group.$(POKI_BUNDLE_ID)
-    POKI_DISPLAY_NAME: ailove
+    POKI_DISPLAY_NAME: myai
     MARKETING_VERSION: "0.2.4"
     CURRENT_PROJECT_VERSION: "9"
     SWIFT_VERSION: "5.0"
@@ -81,17 +81,17 @@ targets:
         BGTaskSchedulerPermittedIdentifiers: ["$(POKI_BUNDLE_ID).run.*"]
         # Documents/AgentBackup holds the agent's memory backup, which Poki Setup copies off and puts back.
         UIFileSharingEnabled: true
-        NSLocationWhenInUseUsageDescription: ailove keeps running in the background while it is on, so agents can reach this iPhone. ailove does not record or send your location.
-        NSLocationAlwaysAndWhenInUseUsageDescription: ailove keeps running in the background while it is on, so agents can reach this iPhone. ailove does not record or send your location.
+        NSLocationWhenInUseUsageDescription: myai keeps running in the background while it is on, so agents can reach this iPhone. myai does not record or send your location.
+        NSLocationAlwaysAndWhenInUseUsageDescription: myai keeps running in the background while it is on, so agents can reach this iPhone. myai does not record or send your location.
         CFBundleURLTypes:
           - CFBundleURLName: $(POKI_BUNDLE_ID)
-            CFBundleURLSchemes: [ailove]
-        NSLocalNetworkUsageDescription: ailove connects to this iPhone's own developer services to pair with it and to run the automation, and to the voice bridge on your Mac.
-        NSFaceIDUsageDescription: ailove uses Face ID to unlock Screen History, so only you can open it.
-        NSCameraUsageDescription: ailove uses the camera to take photos you send in a message, and to scan the pairing code Poki Setup shows on your computer.
-        NSMicrophoneUsageDescription: When you start live voice, ailove sends microphone audio to your voice service so you can give instructions while using other apps. Tap End to close the microphone.
-        NSSpeechRecognitionUsageDescription: ailove uses speech recognition for dictation, to transcribe app audio on this iPhone, and to turn your recording into a text task if live voice can’t connect.
-        NSScreenCaptureUsageDescription: ailove listens to app audio you choose to share so it can answer questions about it.
+            CFBundleURLSchemes: [myai]
+        NSLocalNetworkUsageDescription: myai connects to this iPhone's own developer services to pair with it and to run the automation, and to the voice bridge on your Mac.
+        NSFaceIDUsageDescription: myai uses Face ID to unlock Screen History, so only you can open it.
+        NSCameraUsageDescription: myai uses the camera to take photos you send in a message, and to scan the pairing code Poki Setup shows on your computer.
+        NSMicrophoneUsageDescription: When you start live voice, myai sends microphone audio to your voice service so you can give instructions while using other apps. Tap End to close the microphone.
+        NSSpeechRecognitionUsageDescription: myai uses speech recognition for dictation, to transcribe app audio on this iPhone, and to turn your recording into a text task if live voice can’t connect.
+        NSScreenCaptureUsageDescription: myai listens to app audio you choose to share so it can answer questions about it.
         # The voice bridge runs on the person's Mac on the local network, over plain HTTP.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
@@ -198,7 +198,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(POKI_BUNDLE_ID).widgets
 
 schemes:
-  Poki:
+  Poki: &app-scheme
     build:
       targets:
         Poki: all
@@ -212,3 +212,4 @@ schemes:
       targets: [PokiTests, PokiUITests]
     archive:
       config: Release
+  myai: *app-scheme

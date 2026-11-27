@@ -3,7 +3,7 @@
 //! - [`device`]: the iPhone over USB (usbmuxd) or Wi-Fi (the pairing record): pairing, facts,
 //!   Developer Mode, installing, the app container, the developer disk image, logs.
 //! - [`pairshare`]: hands the pairing file to Poki on the phone over the local network, as the
-//!   `poki://pairing?url=…&sha256=…` link Poki opens from a QR code.
+//!   `myai://pairing?url=…&sha256=…` link Poki opens from a QR code.
 //! - [`apple`]: the Apple account (GSA login with SRP and 2FA, anisette) and the developer portal
 //!   (teams, devices, certificates, App IDs, app groups, profiles).
 //! - [`sign`]: takes Poki's release IPA and signs it for a team: bundle ids, app groups,

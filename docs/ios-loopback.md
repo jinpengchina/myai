@@ -1,10 +1,10 @@
 # Local developer connection
 
-ailove reaches this iPhone’s local services through its embedded packet tunnel. Entering the connection step starts the tunnel and lets iOS present its VPN configuration prompt. A device previously set up with an external VPN uses the same built-in flow on upgrade.
+myai reaches this iPhone’s local services through its embedded packet tunnel. Entering the connection step starts the tunnel and lets iOS present its VPN configuration prompt. A device previously set up with an external VPN uses the same built-in flow on upgrade.
 
 ## Design
 
-`LoopbackTunnel` reads its provider identifier from the embedded extension. It creates, starts and stops the matching configuration. Setup verifies the local service through ailove’s own connected provider. The remote agent relay is configured separately.
+`LoopbackTunnel` reads its provider identifier from the embedded extension. It creates, starts and stops the matching configuration. Setup verifies the local service through myai’s own connected provider. The remote agent relay is configured separately.
 
 The extension calls `LoopbackNetworkSettings.make()` and passes packets through
 `LoopbackPacket.reflect(Data) -> Data?`. These are production interfaces in the small `PokiLoopback`
@@ -28,11 +28,11 @@ lockdown (`62078`) accepts a TCP connection through `10.7.0.1`.
 
 ## Signing and distribution
 
-`native/ios-app/ailove.yml` includes the packet-tunnel target. Both ailove and the extension require `com.apple.developer.networking.networkextension = [packet-tunnel-provider]` in matching provisioning profiles. The app and widget share the same registered App Group. See the [build and signing instructions](../README.md#build-for-your-iphone).
+`native/ios-app/myai.yml` includes the packet-tunnel target. Both myai and the extension require `com.apple.developer.networking.networkextension = [packet-tunnel-provider]` in matching provisioning profiles. The app and widget share the same registered App Group. See the [build and signing instructions](../README.md#build-for-your-iphone).
 
 ## Setup
 
-On the connection page, approve the iOS VPN configuration when prompted. If another VPN is active, iOS may switch to ailove’s tunnel. After a failed attempt, the connection page offers a retry.
+On the connection page, approve the iOS VPN configuration when prompted. If another VPN is active, iOS may switch to myai’s tunnel. After a failed attempt, the connection page offers a retry.
 
 ### Cellular connections and automation
 

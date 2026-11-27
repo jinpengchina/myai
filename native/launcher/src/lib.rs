@@ -162,7 +162,7 @@ pub struct PokiPairing {
     task: tokio::task::JoinHandle<()>,
 }
 
-/// Starts one on-device pairing. config_json: {"host_name": "Poki", "out_path": "...",
+/// Starts one on-device pairing. config_json: {"host_name": "myai", "out_path": "...",
 /// "identity_path": "..."}. Events: advertise {service_type, instance, port, txt}, pin {pin},
 /// paired {path}, failed {detail}. Null when the config is unreadable.
 #[unsafe(no_mangle)]
@@ -172,7 +172,7 @@ pub unsafe extern "C" fn poki_pair_start(config_json: *const c_char, cb: EventCa
     let Ok(value) = serde_json::from_str::<Value>(&text) else { return std::ptr::null_mut() };
     let Some(out_path) = value["out_path"].as_str() else { return std::ptr::null_mut() };
     let config = pair::PairConfig {
-        host_name: value["host_name"].as_str().unwrap_or("Poki").to_string(),
+        host_name: value["host_name"].as_str().unwrap_or("myai").to_string(),
         out_path: out_path.into(),
         identity_path: value["identity_path"].as_str().map(Into::into),
     };

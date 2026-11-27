@@ -173,7 +173,7 @@ enum VoiceError: LocalizedError {
         case .bridge(404, _): "The voice bridge doesn't know this address. Copy it again from the Mac."
         case .bridge(let code, let reason): "The voice bridge answered \(code): \(reason ?? "no reason given")"
         case .realtime(let code, let reason): "OpenAI answered \(code): \(reason)"
-        case .noBridge: "Set up Poki's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."
+        case .noBridge: "Set up myai's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."
         case .appAudioNeedsKeyOrBridge: "Ask about App Audio isn't available with ChatGPT sign-in alone. Add an API key or voice bridge, or stop listening to app audio to keep using ChatGPT voice."
         case .timeout(let what): "\(what) took too long."
         case .noPath: "The voice connection could not reach OpenAI over this network. Check Wi-Fi or cellular, or a VPN or proxy app that blocks calls, then try again."
@@ -189,7 +189,7 @@ enum VoiceError: LocalizedError {
         case .bridge(let code, let reason):
             AppLocalization.text(LocalizedStringResource("The voice bridge answered \(code): \(reason ?? AppLocalization.text(LocalizedStringResource("no reason given")))"))
         case .realtime(let code, let reason): AppLocalization.text(LocalizedStringResource("OpenAI answered \(code): \(reason)"))
-        case .noBridge: AppLocalization.text(LocalizedStringResource("Set up Poki's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."))
+        case .noBridge: AppLocalization.text(LocalizedStringResource("Set up myai's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."))
         case .appAudioNeedsKeyOrBridge: AppLocalization.text(LocalizedStringResource("Ask about App Audio isn't available with ChatGPT sign-in alone. Add an API key or voice bridge, or stop listening to app audio to keep using ChatGPT voice."))
         case .timeout(let what): AppLocalization.text(LocalizedStringResource("\(what) took too long."))
         case .noPath: AppLocalization.text(LocalizedStringResource("The voice connection could not reach OpenAI over this network. Check Wi-Fi or cellular, or a VPN or proxy app that blocks calls, then try again."))
@@ -1482,7 +1482,7 @@ final class VoiceModel {
                 let left = stallLeft()
                 if left > .zero { wait = left; continue }
                 if waitingOnServer {
-                    log.add("voice", "the server said nothing for \(inBackground ? Self.backgroundStall : Self.stall) while Poki waited on it: conversation ended")
+                    log.add("voice", "the server said nothing for \(inBackground ? Self.backgroundStall : Self.stall) while myai waited on it: conversation ended")
                     lines.append(VoiceLine(role: .note, text: AppLocalization.text(LocalizedStringResource("The server did not answer. The talk ended."))))
                     if !startOpeningDictation() { stop() }
                     return
@@ -1607,7 +1607,7 @@ final class VoiceModel {
         // Preserve the latest request even when Poki's reply is long.
         var priority = [turns.lastIndex { $0.role == .you }, turns.indices.last].compactMap { $0 }
         if priority.count == 2 && priority[0] == priority[1] { priority.removeLast() }
-        func label(for index: Int) -> String { turns[index].role == .you ? "\nUser: " : "\nPoki: " }
+        func label(for index: Int) -> String { turns[index].role == .you ? "\nUser: " : "\nmyai: " }
         let replyBytes = priority.dropFirst().first.map { label(for: $0).utf8.count + turns[$0].text.utf8.count } ?? 0
         let replyReserve = min(available / 2, replyBytes)
         var kept: [Int: String] = [:]
@@ -2616,7 +2616,7 @@ final class VoiceModel {
                 let trimmed = reason?.trimmingCharacters(in: .whitespacesAndNewlines)
                 let clean = sanitizeLogText(trimmed?.isEmpty == false ? trimmed! : "no reason given", limit: 140)
                 if (300..<400).contains(code) {
-                    return "the HTTPS voice bridge redirected the screenshot request, which Poki blocks"
+                    return "the HTTPS voice bridge redirected the screenshot request, which myai blocks"
                 }
                 if code == 400 {
                     return "the voice bridge rejected the screenshot request (400: \(clean))"

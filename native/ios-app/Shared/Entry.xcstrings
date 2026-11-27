@@ -22,19 +22,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove 并开始说话。"
+            "value" : "打开 myai 并开始说话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開 ailove 並開始說話。"
+            "value" : "打開 myai 並開始說話。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opens ailove and starts talking."
+            "value" : "Opens myai and starts talking."
           }
         }
       }
@@ -44,19 +44,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove 并开始说话。ailove 正在做任务时，显示这个任务，任务继续进行。"
+            "value" : "打开 myai 并开始说话。myai 正在做任务时，显示这个任务，任务继续进行。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開 ailove 並開始說話。ailove 正在做任務時，顯示這個任務，任務繼續進行。"
+            "value" : "打開 myai 並開始說話。myai 正在做任務時，顯示這個任務，任務繼續進行。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opens ailove and starts talking. If ailove is doing a task, it shows that task and leaves it running."
+            "value" : "Opens myai and starts talking. If myai is doing a task, it shows that task and leaves it running."
           }
         }
       }
@@ -66,19 +66,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 没能开始这个任务，原因在聊天里。"
+            "value" : "myai 没能开始这个任务，原因在聊天里。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 沒能開始這個任務，原因在聊天裡。"
+            "value" : "myai 沒能開始這個任務，原因在聊天裡。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove couldn’t start the task. The chat says why."
+            "value" : "myai couldn’t start the task. The chat says why."
           }
         }
       }
@@ -88,19 +88,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 还在忙，这个任务没有开始。这里是 ailove 正在做的事。"
+            "value" : "myai 还在忙，这个任务没有开始。这里是 myai 正在做的事。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 還在忙，這個任務沒有開始。這裡是 ailove 正在做的事。"
+            "value" : "myai 還在忙，這個任務沒有開始。這裡是 myai 正在做的事。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove is still busy, so this task didn’t start. Here is what ailove is doing."
+            "value" : "myai is still busy, so this task didn’t start. Here is what myai is doing."
           }
         }
       }
@@ -110,19 +110,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 正在忙，请等当前任务结束后再试。"
+            "value" : "myai 正在忙，请等当前任务结束后再试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 正在忙，請等目前的任務結束後再試。"
+            "value" : "myai 正在忙，請等目前的任務結束後再試。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove is busy. Wait for the current task to finish and try again."
+            "value" : "myai is busy. Wait for the current task to finish and try again."
           }
         }
       }
@@ -132,19 +132,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请先在 ailove 的设置里选择模型，再回到分屏重试。"
+            "value" : "请先在 myai 的设置里选择模型，再回到分屏重试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請先在 ailove 的設定裡選擇模型，再回到分割顯示重試。"
+            "value" : "請先在 myai 的設定裡選擇模型，再回到分割顯示重試。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose a model in ailove’s settings, then return to Split View and try again."
+            "value" : "Choose a model in myai’s settings, then return to Split View and try again."
           }
         }
       }
@@ -154,19 +154,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已开始这个任务。开启 ailove 后它才能操作手机。"
+            "value" : "myai 已开始这个任务。开启 myai 后它才能操作手机。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已開始這個任務。開啟 ailove 後它才能操作手機。"
+            "value" : "myai 已開始這個任務。開啟 myai 後它才能操作手機。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove started the task. Turn ailove on so it can act on the phone."
+            "value" : "myai started the task. Turn myai on so it can act on the phone."
           }
         }
       }
@@ -176,19 +176,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 在这台 iPhone 上开始做这个任务，做完后告诉你。"
+            "value" : "myai 在这台 iPhone 上开始做这个任务，做完后告诉你。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 在這台 iPhone 上開始做這個任務，做完後告訴你。"
+            "value" : "myai 在這台 iPhone 上開始做這個任務，做完後告訴你。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove starts the task on this iPhone and tells you when it is done."
+            "value" : "myai starts the task on this iPhone and tells you when it is done."
           }
         }
       }
@@ -198,19 +198,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 还没准备好，请稍后再试。"
+            "value" : "myai 还没准备好，请稍后再试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 還沒準備好，請稍後再試。"
+            "value" : "myai 還沒準備好，請稍後再試。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove wasn’t ready. Try again in a moment."
+            "value" : "myai wasn’t ready. Try again in a moment."
           }
         }
       }
@@ -220,19 +220,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住操作按钮，不离开当前 App 就能和 ailove 说话，再按住一次就结束。想打开 ailove 在里面说话，选「控制」，再选「和 ailove 说话」。想输入任务，选「快捷指令」，再选「发送任务」。控制中心和锁定屏幕也可以放「和 ailove 说话」。"
+            "value" : "按住操作按钮，不离开当前 App 就能和 myai 说话，再按住一次就结束。想打开 myai 在里面说话，选「控制」，再选「和 myai 说话」。想输入任务，选「快捷指令」，再选「发送任务」。控制中心和锁定屏幕也可以放「和 myai 说话」。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住動作按鈕，不離開目前的 App 就能和 ailove 說話，再按住一次就結束。想打開 ailove 在裡面說話，選「控制項目」，再選「和 ailove 說話」。想輸入任務，選「捷徑」，再選「傳送任務」。控制中心和鎖定畫面也可以放「和 ailove 說話」。"
+            "value" : "按住動作按鈕，不離開目前的 App 就能和 myai 說話，再按住一次就結束。想打開 myai 在裡面說話，選「控制項目」，再選「和 myai 說話」。想輸入任務，選「捷徑」，再選「傳送任務」。控制中心和鎖定畫面也可以放「和 myai 說話」。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Press and hold the Action button to talk with ailove without leaving the app you’re in. Press and hold it again to end the talk. To open ailove and talk there instead, choose Controls, then Talk to ailove. To type a task, choose Shortcut, then Send Task. Control Center and the Lock Screen can hold Talk to ailove too."
+            "value" : "Press and hold the Action button to talk with myai without leaving the app you’re in. Press and hold it again to end the talk. To open myai and talk there instead, choose Controls, then Talk to myai. To type a task, choose Shortcut, then Send Task. Control Center and the Lock Screen can hold Talk to myai too."
           }
         }
       }
@@ -242,19 +242,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "把 ${task} 发给 ailove"
+            "value" : "把 ${task} 发给 myai"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "把 ${task} 發給 ailove"
+            "value" : "把 ${task} 發給 myai"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send ${task} to ailove"
+            "value" : "Send ${task} to myai"
           }
         }
       }
@@ -280,19 +280,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "先打开 ailove 并启用本机自动化，再将两个 App 摆成分屏，然后重新运行快捷指令。"
+            "value" : "先打开 myai 并启用本机自动化，再将两个 App 摆成分屏，然后重新运行快捷指令。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "先開啟 ailove 並啟用裝置上的自動化，再以分割顯示開啟兩個 App，然後重新執行捷徑。"
+            "value" : "先開啟 myai 並啟用裝置上的自動化，再以分割顯示開啟兩個 App，然後重新執行捷徑。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn on ailove with on-device automation, then open the two apps in Split View and run the shortcut again."
+            "value" : "Turn on myai with on-device automation, then open the two apps in Split View and run the shortcut again."
           }
         }
       }
@@ -318,19 +318,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "给 ailove 发任务"
+            "value" : "给 myai 发任务"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "給 ailove 發任務"
+            "value" : "給 myai 發任務"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send Task to ailove"
+            "value" : "Send Task to myai"
           }
         }
       }
@@ -340,19 +340,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "设置 › 操作按钮 › 快捷指令 › 随时 ailove"
+            "value" : "设置 › 操作按钮 › 快捷指令 › 随时 myai"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定 › 動作按鈕 › 捷徑 › 隨時 ailove"
+            "value" : "設定 › 動作按鈕 › 捷徑 › 隨時 myai"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Settings › Action Button › Shortcut › ailove Anytime"
+            "value" : "Settings › Action Button › Shortcut › myai Anytime"
           }
         }
       }
@@ -362,19 +362,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 ailove 说话"
+            "value" : "和 myai 说话"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 ailove 說話"
+            "value" : "和 myai 說話"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Talk to ailove"
+            "value" : "Talk to myai"
           }
         }
       }
@@ -400,19 +400,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "要 ailove 做什么？"
+            "value" : "要 myai 做什么？"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "要 ailove 做什麼？"
+            "value" : "要 myai 做什麼？"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What should ailove do?"
+            "value" : "What should myai do?"
           }
         }
       }
@@ -422,19 +422,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "随时 ailove"
+            "value" : "随时 myai"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "隨時 ailove"
+            "value" : "隨時 myai"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove Anytime"
+            "value" : "myai Anytime"
           }
         }
       }
@@ -444,19 +444,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不离开当前 App，直接和 ailove 说话。ailove 能看到这个 App，也能在里面操作。再运行一次可结束对话；若语音没连上或接通后断线且仍有未确认录音，再运行一次会把它转成文字发出。"
+            "value" : "不离开当前 App，直接和 myai 说话。myai 能看到这个 App，也能在里面操作。再运行一次可结束对话；若语音没连上或接通后断线且仍有未确认录音，再运行一次会把它转成文字发出。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不離開目前的 App，直接和 ailove 說話。ailove 能看到這個 App，也能在裡面操作。再執行一次可結束對話；若語音沒連上或接通後斷線且仍有未確認錄音，再執行一次會把它轉成文字送出。"
+            "value" : "不離開目前的 App，直接和 myai 說話。myai 能看到這個 App，也能在裡面操作。再執行一次可結束對話；若語音沒連上或接通後斷線且仍有未確認錄音，再執行一次會把它轉成文字送出。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starts talking with ailove without leaving the app you’re in. ailove can see that app and work in it. Run it again to end the talk, or to send unconfirmed opening speech as text if voice couldn’t connect or disconnected."
+            "value" : "Starts talking with myai without leaving the app you’re in. myai can see that app and work in it. Run it again to end the talk, or to send unconfirmed opening speech as text if voice couldn’t connect or disconnected."
           }
         }
       }
@@ -466,19 +466,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 没能在锁定屏幕上显示对话，所以打开 ailove 来说话。"
+            "value" : "myai 没能在锁定屏幕上显示对话，所以打开 myai 来说话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 沒能在鎖定畫面上顯示對話，所以打開 ailove 來說話。"
+            "value" : "myai 沒能在鎖定畫面上顯示對話，所以打開 myai 來說話。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove couldn’t show the talk on the Lock Screen, so it opens to talk."
+            "value" : "myai couldn’t show the talk on the Lock Screen, so it opens to talk."
           }
         }
       }
@@ -488,19 +488,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请先完成 ailove 的设置。"
+            "value" : "请先完成 myai 的设置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請先完成 ailove 的設定。"
+            "value" : "請先完成 myai 的設定。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finish setting up ailove first."
+            "value" : "Finish setting up myai first."
           }
         }
       }
@@ -510,19 +510,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请先设置 ailove 的语音。"
+            "value" : "请先设置 myai 的语音。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請先設定 ailove 的語音。"
+            "value" : "請先設定 myai 的語音。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Set up ailove’s voice first."
+            "value" : "Set up myai’s voice first."
           }
         }
       }
@@ -532,19 +532,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 正在做任务，这是它在做的事。"
+            "value" : "myai 正在做任务，这是它在做的事。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 正在做任務，這是它在做的事。"
+            "value" : "myai 正在做任務，這是它在做的事。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove is doing a task. Here it is."
+            "value" : "myai is doing a task. Here it is."
           }
         }
       }
@@ -586,19 +586,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove 授权本机听写，以便语音接不通时把录音转成文字。"
+            "value" : "打开 myai 授权本机听写，以便语音接不通时把录音转成文字。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開 ailove 授權本機聽寫，以便語音接不通時把錄音轉成文字。"
+            "value" : "打開 myai 授權本機聽寫，以便語音接不通時把錄音轉成文字。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open ailove to allow on-device speech recognition for when voice can’t connect."
+            "value" : "Open myai to allow on-device speech recognition for when voice can’t connect."
           }
         }
       }
@@ -624,19 +624,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已开始处理后连接断开，未重复发送前半句。请确认后半句是否已收到。"
+            "value" : "myai 已开始处理后连接断开，未重复发送前半句。请确认后半句是否已收到。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已開始處理後連線中斷，未重複送出前半句。請確認後半句是否已收到。"
+            "value" : "myai 已開始處理後連線中斷，未重複送出前半句。請確認後半句是否已收到。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Connection lost after ailove started working. Nothing was sent again. Check whether the rest of what you said went through."
+            "value" : "Connection lost after myai started working. Nothing was sent again. Check whether the rest of what you said went through."
           }
         }
       }
@@ -646,19 +646,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已开始处理后连接断开，仅将确定未送出的尾段转成文字发送。请确认刚才那部分是否已执行，避免重复操作。"
+            "value" : "myai 已开始处理后连接断开，仅将确定未送出的尾段转成文字发送。请确认刚才那部分是否已执行，避免重复操作。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 已開始處理後連線中斷，僅將確定未送出的尾段轉成文字送出。請確認剛才那部分是否已執行，避免重複操作。"
+            "value" : "myai 已開始處理後連線中斷，僅將確定未送出的尾段轉成文字送出。請確認剛才那部分是否已執行，避免重複操作。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Connection lost after ailove started working. Only the unsent end will be sent as text. Check whether the earlier part was already handled."
+            "value" : "Connection lost after myai started working. Only the unsent end will be sent as text. Check whether the earlier part was already handled."
           }
         }
       }
@@ -668,19 +668,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 没能在后台获取到麦克风，所以打开 ailove 来说话。"
+            "value" : "myai 没能在后台获取到麦克风，所以打开 myai 来说话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 沒能在背景取得麥克風，所以打開 ailove 來說話。"
+            "value" : "myai 沒能在背景取得麥克風，所以打開 myai 來說話。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove couldn’t capture the microphone in the background, so it opens to talk."
+            "value" : "myai couldn’t capture the microphone in the background, so it opens to talk."
           }
         }
       }
@@ -690,19 +690,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 没能在后台获取到麦克风，请打开 ailove 来说话。"
+            "value" : "myai 没能在后台获取到麦克风，请打开 myai 来说话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 沒能在背景取得麥克風，請打開 ailove 來說話。"
+            "value" : "myai 沒能在背景取得麥克風，請打開 myai 來說話。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove couldn’t capture the microphone in the background. Open ailove to talk."
+            "value" : "myai couldn’t capture the microphone in the background. Open myai to talk."
           }
         }
       }
@@ -712,19 +712,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请先允许 ailove 使用麦克风。"
+            "value" : "请先允许 myai 使用麦克风。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請先允許 ailove 使用麥克風。"
+            "value" : "請先允許 myai 使用麥克風。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow ailove to use the microphone first."
+            "value" : "Allow myai to use the microphone first."
           }
         }
       }

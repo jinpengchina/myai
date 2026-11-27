@@ -1,6 +1,6 @@
 # Privacy
 
-ailove is a self-signed developer preview. It operates on the iPhone where you set it up. You choose the model and voice accounts used by this copy.
+myai is a self-signed developer preview. It operates on the iPhone where you set it up. You choose the model and voice accounts used by this copy.
 
 - **Screen and actions.** A phone task can read on-screen text and images and send relevant content to the configured model as task context. The app can then tap, type or swipe while processing the task. Review the model provider's privacy terms, especially before using tasks on screens with personal information.
 - **Microphone.** Live voice uses microphone access you allow in iOS. During an active voice session, audio is sent to the configured voice service. Use **End** to close the session.

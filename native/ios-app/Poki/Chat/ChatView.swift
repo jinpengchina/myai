@@ -1737,7 +1737,7 @@ struct ComposerInputView: View {
                      onSubmit: submit)
             .overlay(alignment: .topLeading) {
                 if input.isEmpty {
-                    Text(dictation.on ? "Listening…" : attachments.isEmpty ? "Message ailove" : "Add a message")
+                    Text(dictation.on ? "Listening…" : attachments.isEmpty ? "Message myai" : "Add a message")
                         .foregroundStyle(.white.opacity(0.7))
                         .lineLimit(1)
                         .padding(.top, 6)

@@ -37,7 +37,8 @@ test('MCP and CLI expose releases, honor opt-out and stay quiet offline', async 
       await mkdir(join(dir, 'state'));
       if (scenario === 'cached') await writeFile(join(dir, 'state/update-check.json'), JSON.stringify({ repo: 'fixture-owner/fixture-repo', checkedAt: Date.now(), release }));
       const daemon = join(dir, 'src/daemon.mjs');
-      await writeFile(daemon, `${scenario === 'default' ? 'delete process.env.AILOVE_LEGACY_RELEASE_REPO;\n' : "process.env.AILOVE_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';\n"}${scenario === 'default' ? '' : `process.env.POKI_NO_UPDATE_CHECK = '${scenario === 'disabled' ? '1' : ''}';\n`}const originalFetch = globalThis.fetch;\nglobalThis.fetch = async (url, options) => {\n const answers = ${JSON.stringify(github)};\n if (!(String(url) in answers)) return originalFetch(url, options);\n await (await import('node:fs/promises')).appendFile(${JSON.stringify(join(dir, 'release-requests'))}, 'request\\n');\n if (options.headers.Authorization || options.headers.authorization) throw Error('Release request must be anonymous');\n ${['offline', 'cached', 'disabled'].includes(scenario) ? "throw Error('Synthetic offline network');" : 'return new Response(JSON.stringify(answers[String(url)]), { status: 200 });'}\n};\n` + await readFile(daemon, 'utf8'));
+      const repo = scenario === 'default' ? '' : 'fixture-owner/fixture-repo';
+      await writeFile(daemon, `process.env.MYAI_LEGACY_RELEASE_REPO = ${JSON.stringify(repo)};\n${scenario === 'default' ? '' : `process.env.POKI_NO_UPDATE_CHECK = '${scenario === 'disabled' ? '1' : ''}';\n`}const originalFetch = globalThis.fetch;\nglobalThis.fetch = async (url, options) => {\n const answers = ${JSON.stringify(github)};\n if (!(String(url) in answers)) return originalFetch(url, options);\n await (await import('node:fs/promises')).appendFile(${JSON.stringify(join(dir, 'release-requests'))}, 'request\\n');\n if (options.headers.Authorization || options.headers.authorization) throw Error('Release request must be anonymous');\n ${['offline', 'cached', 'disabled'].includes(scenario) ? "throw Error('Synthetic offline network');" : 'return new Response(JSON.stringify(answers[String(url)]), { status: 200 });'}\n};\n` + await readFile(daemon, 'utf8'));
       await copyCLI(dir);
     } });
     const result = value(await f.call('poki_mcp_status'));
@@ -127,6 +128,6 @@ test('poki update fast-forwards a clean main checkout and preserves dirty or non
   await mkdir(packaged); await cp(join(installed, 'src'), join(packaged, 'src'), { recursive: true });
   await cp(join(installed, 'package.json'), join(packaged, 'package.json')); await copyCLI(packaged);
   const download = await cli(packaged, ['update']);
-  assert.equal(download.code, 0, download.stderr); assert.match(download.stdout, /Use your ailove checkout/); assert.doesNotMatch(download.stdout, /github\.com/);
+  assert.equal(download.code, 0, download.stderr); assert.match(download.stdout, /Use your myai checkout/); assert.doesNotMatch(download.stdout, /github\.com/);
   t.diagnostic(`$ poki update (prebuilt package)\n${download.stdout}`);
 });

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { latestSetup, downloadIpa } from '../src/install/setup-app.mjs';
 import { releaseSource } from './release-source.mjs';
 
-process.env.AILOVE_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
+process.env.MYAI_LEGACY_RELEASE_REPO = 'fixture-owner/fixture-repo';
 
 const NAME = 'PokiSetup-0.2.2-700-macos.dmg';
 const dmg = source => source.asset(NAME, `/releases/1/${NAME}`, 'dmg');

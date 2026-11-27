@@ -63,17 +63,17 @@ final class LanguageTests: XCTestCase {
     func testSplitViewStartupErrorsFollowTheSelectedLanguage() {
         AppLocalization.shared.preference = "en"
         XCTAssertEqual(ChatModel.splitViewPlanningMessage,
-                       "ailove couldn't determine whether to use Split View. Try sending the task again.")
+                       "myai couldn't determine whether to use Split View. Try sending the task again.")
         let english = ChatModel.splitViewSetupMessage("com.apple.mobilesafari", "com.apple.mobilenotes")
         XCTAssertTrue(english.hasPrefix("Open Safari and Notes together"), english)
 
         AppLocalization.shared.preference = "zh-Hans"
-        XCTAssertEqual(ChatModel.splitViewPlanningMessage, "ailove 无法判断是否需要分屏。请重新发送任务。")
+        XCTAssertEqual(ChatModel.splitViewPlanningMessage, "myai 无法判断是否需要分屏。请重新发送任务。")
         let simplified = ChatModel.splitViewSetupMessage("com.apple.mobilesafari", "com.apple.mobilenotes")
         XCTAssertTrue(simplified.contains("分屏打开 Safari浏览器 和 备忘录"), simplified)
 
         AppLocalization.shared.preference = "zh-Hant"
-        XCTAssertEqual(ChatModel.splitViewPlanningMessage, "ailove 無法判斷是否需要分割顯示。請重新傳送任務。")
+        XCTAssertEqual(ChatModel.splitViewPlanningMessage, "myai 無法判斷是否需要分割顯示。請重新傳送任務。")
         let traditional = ChatModel.splitViewSetupMessage("com.apple.mobilesafari", "com.apple.mobilenotes")
         XCTAssertTrue(traditional.contains("分割顯示 Safari瀏覽器 和 備忘錄"), traditional)
     }

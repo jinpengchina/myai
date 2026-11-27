@@ -50,16 +50,16 @@ impl<E: std::error::Error> From<E> for Failure {
     }
 }
 
-pub const LOOPBACK_FIX: &str = "Connect the built-in VPN in ailove Setup.";
+pub const LOOPBACK_FIX: &str = "Connect the built-in VPN in myai Setup.";
 /// 10.7.0.1 refused the remote pairing port: the loopback is on, and the phone's remote pairing
 /// service listens on another port (or not at all). The app finds the port in Bonjour.
-pub const PAIRING_PORT_FIX: &str = "The loopback is on. iOS moved its pairing service to another port, and Poki finds it through the local network. Keep Wi-Fi on and allow Local Network for Poki in Settings → Privacy & Security. If this stays, restart the iPhone.";
-pub const NETWORK_FIX: &str = "Poki needs the internet once after each restart of the phone to get Apple's signature for the developer disk image. Check Wi-Fi or cellular; Poki tries again by itself.";
+pub const PAIRING_PORT_FIX: &str = "The loopback is on. iOS moved its pairing service to another port, and myai finds it through the local network. Keep Wi-Fi on and allow Local Network for myai in Settings → Privacy & Security. If this stays, restart the iPhone.";
+pub const NETWORK_FIX: &str = "myai needs the internet once after each restart of the phone to get Apple's signature for the developer disk image. Check Wi-Fi or cellular; myai tries again by itself.";
 pub const DDI_PROXY_FIX: &str = "The response from Apple's signing server could not be verified. Check that this network can reach gs.apple.com, then try again.";
-pub const DDI_TIMEOUT_FIX: &str = "Mounting the developer disk image timed out. Poki needs the internet once after each restart to get Apple's signature; check Wi-Fi or cellular. Poki tries again by itself.";
-pub const DDI_REFUSED_FIX: &str = "This iOS version needs a newer developer disk image. Open Poki's setup to download the latest image, or update Poki.";
-pub const DDI_BAD_FIX: &str = "The developer disk image did not install. Poki downloads it again by itself.";
-pub const PAIRING_FIX: &str = "Pair again in Poki's setup.";
+pub const DDI_TIMEOUT_FIX: &str = "Mounting the developer disk image timed out. myai needs the internet once after each restart to get Apple's signature; check Wi-Fi or cellular. myai tries again by itself.";
+pub const DDI_REFUSED_FIX: &str = "This iOS version needs a newer developer disk image. Open myai's setup to download the latest image, or update myai.";
+pub const DDI_BAD_FIX: &str = "The developer disk image did not install. myai downloads it again by itself.";
+pub const PAIRING_FIX: &str = "Pair again in myai's setup.";
 /// The loopback took the connection, then the phone's remote pairing service did not answer, before
 /// the pairing was checked. Seen with Developer Mode on (GitHub issue 69): the loopback, or a new
 /// pairing made over it, is the fix.

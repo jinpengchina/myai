@@ -23,7 +23,7 @@ function run(command, args) {
 
 try {
   if (!existsSync(join(root, '.git'))) {
-    console.log('This source preview has no bundled release updater. Use your ailove checkout and the build steps in README.md.');
+    console.log('This source preview has no bundled release updater. Use your myai checkout and the build steps in README.md.');
   } else {
     if (realpathSync(git('rev-parse', '--show-toplevel')) !== realpathSync(root)) throw new Error('Poki must be at the root of its own Git checkout.');
     if (git('branch', '--show-current') !== 'main') throw new Error('Update stopped: this checkout is not on main. Switch to main yourself before updating.');

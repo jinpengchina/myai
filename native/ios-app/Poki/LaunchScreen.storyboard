@@ -16,7 +16,7 @@
                             <imageView opaque="NO" tag="1" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="AiloveMark" translatesAutoresizingMaskIntoConstraints="NO" id="mark">
                                 <rect key="frame" x="140.5" y="352" width="112" height="112"/>
                             </imageView>
-                            <label opaque="NO" tag="2" userInteractionEnabled="NO" contentMode="left" text="ailove" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="word">
+                            <label opaque="NO" tag="2" userInteractionEnabled="NO" contentMode="left" text="myai" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="word">
                                 <rect key="frame" x="159" y="460" width="75" height="41"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="34"/>
                                 <color key="textColor" red="0.988" green="0.961" blue="0.979" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

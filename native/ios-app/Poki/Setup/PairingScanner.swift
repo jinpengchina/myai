@@ -30,7 +30,7 @@ struct PairingScanner: UIViewControllerRepresentable {
 
         func dataScanner(_ scanner: DataScannerViewController, didAdd items: [RecognizedItem], allItems: [RecognizedItem]) {
             for case .barcode(let code) in items {
-                guard !done, let text = code.payloadStringValue, let url = URL(string: text), ["ailove", "poki"].contains(url.scheme?.lowercased() ?? ""), url.host() == "pairing" else { continue }
+                guard !done, let text = code.payloadStringValue, let url = URL(string: text), ["myai", "ailove", "poki"].contains(url.scheme?.lowercased() ?? ""), url.host() == "pairing" else { continue }
                 done = true
                 scanner.stopScanning()
                 found(url)

@@ -206,7 +206,7 @@ struct SigningSection: View {
                 SettingsRow(title: "Version", symbol: "info", value: "\(signer.installedVersion) (\(signer.installedBuild))")
                 SignedUntilRow(expiry: signer.expiry, countdownColor: countdownColor)
             } footer: {
-                Text("Install ailove updates from your Xcode project using the same developer team.")
+                Text("Install myai updates from your Xcode project using the same developer team.")
             }
         } else {
             upstreamSigning

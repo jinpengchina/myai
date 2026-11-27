@@ -529,7 +529,7 @@ private struct LoopbackPage: View {
             if model.tunnel.connected || localReady { connectionStatus }
         } else {
             Section {
-                Label("The built-in VPN is unavailable in this installation. Reinstall the signed ailove app.",
+                Label("The built-in VPN is unavailable in this installation. Reinstall the signed myai app.",
                       systemImage: "exclamationmark.triangle")
             }
         }
@@ -569,7 +569,7 @@ private struct LoopbackPage: View {
                 if model.connectionInUse {
                     Text("Stop Poki and finish pairing before changing the local connection.")
                 } else if !model.tunnel.connected {
-                    Text("When iOS asks to add the ailove VPN configuration, tap Allow.")
+                    Text("When iOS asks to add the myai VPN configuration, tap Allow.")
                 }
             }
             .settingsFooter()
@@ -660,7 +660,7 @@ private struct PairingPage: View {
             Section("How To") {
                 Label("Pairing on the phone itself needs iOS 27; this iPhone runs iOS \(UIDevice.current.systemVersion). Pair it from a computer instead.", systemImage: "1.circle")
                 Label("Open **Poki Setup** on your Mac or PC, connect this iPhone by cable, and tap **Pair**. Tap **Trust** on the iPhone when asked.", systemImage: "2.circle")
-                Label("Tap **Scan Pairing Code** in ailove to scan the code on your computer, or tap **Import Pairing File** to open a saved file.", systemImage: "3.circle")
+                Label("Tap **Scan Pairing Code** in myai to scan the code on your computer, or tap **Import Pairing File** to open a saved file.", systemImage: "3.circle")
             }
         }
         Section {
@@ -694,7 +694,7 @@ private struct PairingPage: View {
                     Text("Waiting for the iPhone to request a code.")
                         .foregroundStyle(.secondary)
                         .accessibilityIdentifier("pairing.awaitingChallenge")
-                    Text("In Settings, open Privacy & Security › Developer Mode and choose Pair with ailove.")
+                    Text("In Settings, open Privacy & Security › Developer Mode and choose Pair with myai.")
                         .accessibilityIdentifier("pairing.settingsInstructions")
                     Text("If iPhone asks for its passcode, enter the one you use to unlock it. When Settings requests the pairing code, it appears here and in the Dynamic Island.")
                         .accessibilityIdentifier("pairing.islandHint")

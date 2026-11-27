@@ -407,19 +407,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove’s carrying on"
+            "value" : "myai’s carrying on"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 接着办"
+            "value" : "myai 接着办"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 接著辦"
+            "value" : "myai 接著辦"
           }
         }
       }
@@ -556,19 +556,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove’s carrying on"
+            "value" : "myai’s carrying on"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 接着办"
+            "value" : "myai 接着办"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 接著辦"
+            "value" : "myai 接著辦"
           }
         }
       }
@@ -1173,48 +1173,48 @@
         }
       }
     },
-    "Open ailove to connect its built-in VPN." : {
+    "Open myai to connect its built-in VPN." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove，连接内置 VPN。"
+            "value" : "打开 myai，连接内置 VPN。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open ailove to connect its built-in VPN."
+            "value" : "Open myai to connect its built-in VPN."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟 ailove，連接內建 VPN。"
+            "value" : "開啟 myai，連接內建 VPN。"
           }
         }
       }
     },
-    "Check the built-in VPN and pairing in ailove." : {
+    "Check the built-in VPN and pairing in myai." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove 检查内置 VPN 和设备配对。"
+            "value" : "打开 myai 检查内置 VPN 和设备配对。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Check the built-in VPN and pairing in ailove."
+            "value" : "Check the built-in VPN and pairing in myai."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟 ailove 檢查內建 VPN 和裝置配對。"
+            "value" : "開啟 myai 檢查內建 VPN 和裝置配對。"
           }
         }
       }
@@ -1254,7 +1254,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Let ailove Stay On"
+            "value" : "Let myai Stay On"
           }
         },
         "zh-Hant" : {
@@ -1505,19 +1505,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "点“与 ailove 配对”看配对码"
+            "value" : "点“与 myai 配对”看配对码"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap Pair with ailove there. Code appears here."
+            "value" : "Tap Pair with myai there. Code appears here."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "點「與 ailove 配對」看配對碼"
+            "value" : "點「與 myai 配對」看配對碼"
           }
         }
       }
@@ -1528,19 +1528,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove"
+            "value" : "打开 myai"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open ailove"
+            "value" : "Open myai"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟 ailove"
+            "value" : "開啟 myai"
           }
         }
       }
@@ -1551,19 +1551,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 ailove 处理"
+            "value" : "打开 myai 处理"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open ailove to fix it."
+            "value" : "Open myai to fix it."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟 ailove 處理"
+            "value" : "開啟 myai 處理"
           }
         }
       }
@@ -1580,7 +1580,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open Setup in ailove to download the latest image."
+            "value" : "Open Setup in myai to download the latest image."
           }
         },
         "zh-Hant" : {
@@ -1980,19 +1980,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 会自动重下"
+            "value" : "myai 会自动重下"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove retries the download automatically."
+            "value" : "myai retries the download automatically."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 會自動重下"
+            "value" : "myai 會自動重下"
           }
         }
       }
@@ -2009,7 +2009,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove needs internet once after each restart, then retries automatically."
+            "value" : "myai needs internet once after each restart, then retries automatically."
           }
         },
         "zh-Hant" : {
@@ -2209,7 +2209,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Privacy & Security › Developer Mode › Pair with ailove."
+            "value" : "Privacy & Security › Developer Mode › Pair with myai."
           }
         },
         "zh-Hant" : {
@@ -2673,19 +2673,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove skipped this step"
+            "value" : "myai skipped this step"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 跳过了这一步"
+            "value" : "myai 跳过了这一步"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 跳過了這一步"
+            "value" : "myai 跳過了這一步"
           }
         }
       }
@@ -2713,19 +2713,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove stopped"
+            "value" : "myai stopped"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 停下了"
+            "value" : "myai 停下了"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ailove 停下了"
+            "value" : "myai 停下了"
           }
         }
       }
@@ -2821,19 +2821,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "说完后，再运行一次「随时 ailove」转成文字。"
+            "value" : "说完后，再运行一次「随时 myai」转成文字。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "說完後，再執行一次「隨時 ailove」轉成文字。"
+            "value" : "說完後，再執行一次「隨時 myai」轉成文字。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Run ailove Anytime again to send as text."
+            "value" : "Run myai Anytime again to send as text."
           }
         }
       }
@@ -2844,19 +2844,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 ailove 对话"
+            "value" : "和 myai 对话"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 ailove 對話"
+            "value" : "和 myai 對話"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Talk with ailove"
+            "value" : "Talk with myai"
           }
         }
       }
@@ -2890,19 +2890,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "点“与 ailove 配对”输配对码"
+            "value" : "点“与 myai 配对”输配对码"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap Pair with ailove, then enter this code."
+            "value" : "Tap Pair with myai, then enter this code."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "點「與 ailove 配對」輸配對碼"
+            "value" : "點「與 myai 配對」輸配對碼"
           }
         }
       }
@@ -3102,19 +3102,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ready for ailove"
+            "value" : "Ready for myai"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此 iPhone 已可供 ailove 使用"
+            "value" : "此 iPhone 已可供 myai 使用"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此 iPhone 已可供 ailove 使用"
+            "value" : "此 iPhone 已可供 myai 使用"
           }
         }
       }
@@ -3280,7 +3280,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter code in Settings › Pair with ailove"
+            "value" : "Enter code in Settings › Pair with myai"
           }
         }
       }
@@ -3480,7 +3480,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use the same signing tool and Apple Account as ailove."
+            "value" : "Use the same signing tool and Apple Account as myai."
           }
         },
         "zh-Hant" : {
@@ -3736,7 +3736,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Setting up ailove"
+            "value" : "Setting up myai"
           }
         }
       }

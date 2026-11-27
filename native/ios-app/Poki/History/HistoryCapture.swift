@@ -196,8 +196,7 @@ final class HistoryCapture: ObservableObject {
     /// Poki's own screens are never kept, whatever the lists say.
     nonisolated static func isPoki(_ app: String) -> Bool {
         app.caseInsensitiveCompare(Bundle.main.bundleIdentifier ?? AppBrand.name) == .orderedSame
-            || app.caseInsensitiveCompare(AppBrand.name) == .orderedSame
-            || app.caseInsensitiveCompare("Poki") == .orderedSame
+            || AppBrand.matchesDisplayName(app)
     }
 
     private func save(_ value: Any?, _ key: String) {

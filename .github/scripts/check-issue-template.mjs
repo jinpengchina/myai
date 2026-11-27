@@ -8,13 +8,13 @@ import { createApi } from './github-api.mjs';
 
 export const MARKER = '<!-- poki-issue-template-check -->';
 export const LABEL = 'state:needs-info';
-export const AREA_HEADING = 'Affected area in Poki';
+export const AREA_HEADING = 'Affected area in myai';
 // Dropdown answer -> area label. Answers not listed here (Other or not sure) get no area label.
 export const AREA_LABELS = new Map([
-  ['Poki iPhone app', 'area:ios-app'],
+  ['myai iPhone app', 'area:ios-app'],
   ['Poki MCP', 'area:mcp'],
   ['Poki Agent, iMessage, or Telegram', 'area:agent'],
-  ['Installation or Poki Setup', 'area:install'],
+  ['Installation or signing', 'area:install'],
 ]);
 const TEMPLATE_DIR = '.github/ISSUE_TEMPLATE';
 const EXEMPT = new Set(['OWNER', 'MEMBER', 'COLLABORATOR']);

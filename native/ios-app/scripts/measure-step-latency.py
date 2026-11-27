@@ -46,6 +46,11 @@ TASKS = {
 
 OWNED_SIMULATORS: set[str] = set()
 BUILTIN_PROFILES = ("empty", "light", "heavy")
+BROWSER_TOOL_PREFIXES = (
+    "myai has its own browser for websites",
+    "Poki has its own browser for websites",
+    "ailove has its own browser for websites",
+)
 
 
 def resolve_developer_dir() -> str:
@@ -186,7 +191,7 @@ def split_system_prompt(text: str) -> dict:
             if (
                 ps.startswith("For a request measured in pages or screens,")
                 or ps.startswith("look reads the iPhone's screen;")
-                or ps.startswith("Poki has its own browser")
+                or ps.startswith(BROWSER_TOOL_PREFIXES)
                 or ps.startswith("To continue or resume,")
             ):
                 in_reply_examples = False
@@ -218,7 +223,7 @@ def split_system_prompt(text: str) -> dict:
                 sections["skills"] += ("\n" if sections["skills"] else "") + "\n".join(skill_lines)
         elif (
             ps.startswith("look reads the iPhone's screen;")
-            or ps.startswith("Poki has its own browser for websites")
+            or ps.startswith(BROWSER_TOOL_PREFIXES)
             or ("Screen History" in ps and "screen_history" in ps)
         ):
             sections["embedded_tool_instructions"] += ("\n\n" if sections["embedded_tool_instructions"] else "") + p

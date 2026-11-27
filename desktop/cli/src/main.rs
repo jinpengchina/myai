@@ -634,7 +634,7 @@ async fn run() -> Result<()> {
                 };
                 let d = cf.deploy(&acct, &reporter).await?;
                 relay::remember(&d)?;
-                println!("Your relay: {}\nIn Poki, open Connect → Relay address and enter it, or scan:\n{}", d.address, qr_text(&d.phone_link));
+                println!("Your relay: {}\nIn myai, open Connect → Relay address and enter it, or scan:\n{}", d.address, qr_text(&d.phone_link));
                 Ok(())
             }
             RelayCmd::Check { address } => {

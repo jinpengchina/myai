@@ -196,7 +196,7 @@ struct RelayView: View {
                 if rejected {
                     Text("That is not a relay address. Enter the address deploy.sh printed, such as https://poki-relay.you.workers.dev.").foregroundStyle(.red)
                 } else {
-                    Text("Poki has no default relay. Deploy your own to your Cloudflare account with deploy/cf-relay/deploy.sh from your ailove source checkout, then enter the address it prints. Screenshots and taps pass only through that relay.")
+                    Text("myai has no default relay. Deploy your own to your Cloudflare account with deploy/cf-relay/deploy.sh from the myai repository, then enter the address it prints. Screenshots and taps pass only through that relay.")
                 }
             }
             Section("Status") { LabeledContent("Relay", value: statusText) }

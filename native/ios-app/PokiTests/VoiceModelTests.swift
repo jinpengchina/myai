@@ -975,7 +975,7 @@ final class VoiceModelTests: XCTestCase {
         let context = try XCTUnwrap(event["content"] as? String)
         XCTAssertLessThanOrEqual(context.utf8.count, 480)
         let user = try XCTUnwrap(context.range(of: "User: 把最后一站改成花店。"))
-        let poki = try XCTUnwrap(context.range(of: "Poki: 好的，最后一站改成花店。"))
+        let poki = try XCTUnwrap(context.range(of: "myai: 好的，最后一站改成花店。"))
         XCTAssertLessThan(user.lowerBound, poki.lowerBound)
         XCTAssertFalse(context.contains("计划第一站到车站"))
         h.voice.stop()
@@ -993,7 +993,7 @@ final class VoiceModelTests: XCTestCase {
         let event = try XCTUnwrap(h.link.sent.first { $0["type"] as? String == "session.instructions.append" })
         let context = try XCTUnwrap(event["content"] as? String)
         XCTAssertLessThanOrEqual(context.utf8.count, 480)
-        XCTAssertTrue(context.contains("User: \(request)\nPoki: 好的。"), "The latest request and reply fit with the correction intact.")
+        XCTAssertTrue(context.contains("User: \(request)\nmyai: 好的。"), "The latest request and reply fit with the correction intact.")
         h.voice.stop()
     }
 
@@ -3800,12 +3800,12 @@ extension VoiceModelTests {
         URLProtocol.registerClass(BridgeTroubleStub.self)
         defer { AppLocalization.shared.preference = saved; URLProtocol.unregisterClass(BridgeTroubleStub.self) }
         let expected: [(language: String, noModel: String, gone: String, slow: String)] = [
-            ("en", "Set up ailove's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac.",
+            ("en", "Set up myai's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac.",
              "Copy the voice bridge address again from your Mac. This address wasn’t recognized.",
              "The voice connection took too long. Check the network, then try again."),
-            ("zh-Hans", "请先设置 ailove 的模型（用 OpenAI 密钥对话最快），或输入 Mac 上的语音桥接地址。",
+            ("zh-Hans", "请先设置 myai 的模型（用 OpenAI 密钥对话最快），或输入 Mac 上的语音桥接地址。",
              "请从 Mac 重新拷贝语音桥接地址。当前地址无法识别。", "语音连接超时。请检查网络后重试。"),
-            ("zh-Hant", "請先設定 ailove 的模型（用 OpenAI 金鑰對話最快），或輸入 Mac 上的語音橋接地址。",
+            ("zh-Hant", "請先設定 myai 的模型（用 OpenAI 金鑰對話最快），或輸入 Mac 上的語音橋接地址。",
              "請從 Mac 重新複製語音橋接位址。目前位址無法識別。", "語音連線逾時。請檢查網路後再試。"),
         ]
         for words in expected {

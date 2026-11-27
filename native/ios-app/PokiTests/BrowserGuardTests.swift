@@ -237,9 +237,9 @@ final class BrowserGuardTests: XCTestCase {
         XCTAssertTrue(prompt.contains("Use web_open and web tools alone for public websites"), "the website route reaches the model")
         XCTAssertTrue(prompt.contains("Website verification codes also go to the owner through web_handoff"), "a website's sign-in code stays with the owner")
         // Who Poki is comes first, then the phone's tool rules, then the browser's.
-        XCTAssertTrue(prompt.hasPrefix("You are ailove, the user's personal assistant"), String(prompt.prefix(80)))
+        XCTAssertTrue(prompt.hasPrefix("You are myai, the user's personal assistant"), String(prompt.prefix(80)))
         let phoneRules = try XCTUnwrap(prompt.range(of: "look reads the iPhone's screen")).lowerBound
-        let browserRules = try XCTUnwrap(prompt.range(of: "Poki has its own browser for websites")).lowerBound
+        let browserRules = try XCTUnwrap(prompt.range(of: "myai has its own browser for websites")).lowerBound
         XCTAssertLessThan(phoneRules, browserRules)
     }
 

@@ -352,7 +352,7 @@ struct RootView: View {
         // A Memory source is an internal navigation action, not an external app launch.
         // Use the same handler as onOpenURL while keeping the presented Settings stack.
         .environment(\.openURL, OpenURLAction { url in
-            guard url.scheme == "ailove", url.host() == "session" else { return .systemAction }
+            guard url.scheme == "myai" || url.scheme == "ailove", url.host() == "session" else { return .systemAction }
             open(link: url)
             return .handled
         })
@@ -475,9 +475,9 @@ struct RootView: View {
                 model.wentToBackground()
             }
         }
-        // A tap on the Live Activity opens the screen its state is about (ActivityFace.link): `ailove://activity`
+        // A tap on the Live Activity opens the screen its state is about (ActivityFace.link): `myai://activity`
         // keeps an active task running and returns to its target app; other links open the chat, the setup
-        // step, or the Activity Log for a problem, and `ailove://voice` brings the chat to the front.
+        // step, or the Activity Log for a problem, and `myai://voice` brings the chat to the front.
         .onOpenURL { url in open(link: url) }
         // On the window, not the view: sheets and full-screen covers take it too, and Automatic hands back to iOS.
         .onChange(of: appearance, initial: true) { _, value in
@@ -517,7 +517,7 @@ struct RootView: View {
         }
         .task {
             #if DEBUG
-            // Development builds: `-pokiVoiceLink "ailove://voice?…"` at launch starts a silent test run.
+            // Development builds: `-pokiVoiceLink "myai://voice?…"` at launch starts a silent test run.
             if let link = UserDefaults.standard.string(forKey: "pokiVoiceLink"), let url = URL(string: link), url.host() == "voice" {
                 show(.chat)
                 model.voice.openAtLaunch(url)
@@ -527,7 +527,7 @@ struct RootView: View {
     }
 
     private func open(link url: URL) {
-        AppLog.shared.add("app", "opened by link ailove://\(url.host() ?? "")")
+        AppLog.shared.add("app", "opened by link myai://\(url.host() ?? "")")
         // Keep the code visible through unrelated links. The owner can still import a pairing
         // file or approve a replacement offered by a pairing link while the listener is running.
         guard !model.pairingUnderWay || url.isFileURL || url.host() == "pairing" else { return }
@@ -562,12 +562,12 @@ struct RootView: View {
         } else if url.host() == "approvals" {
             openDetails([DetailsRoute.approvals])
         } else if url.host() == "memory" {
-            // ailove://memory, and ailove://memory/recent?change=<id> from a conversation's "Memory updated",
+            // myai://memory, and myai://memory/recent?change=<id> from a conversation's "Memory updated",
             // which lights that change up.
             let change = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "change" }?.value
             openDetails(url.path() == "/recent" ? [SettingsRoute.memory, SettingsRoute.memoryPage(.recent(highlight: change))] : [SettingsRoute.memory])
         } else if url.host() == "session" {
-            // ailove://session/<id>: a memory's Source, back to the conversation it was heard in. A conversation
+            // myai://session/<id>: a memory's Source, back to the conversation it was heard in. A conversation
             // that is no longer kept leaves the page where it is.
             if let id = url.pathComponents.dropFirst().first, sessionStore.session(id) != nil {
                 openRun(id)
